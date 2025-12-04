@@ -45,6 +45,12 @@ The [traefik-crds chart](../traefik-crds/README.md) is installed automatically i
 | namespace | string | `"kube-system"` | The installation namespace. The kube-system namespace tells kubernetes that this app has a higher priority |
 | traefik | object | | [the Optional Traefik Chart values](https://github.com/traefik/traefik-helm-chart/blob/v34.4.1/traefik/values.yaml) |
 
+## Install
+
+```bash
+kubee --cluster cluster-name helmet play traefik
+```
+
 ## FAQ
 ### Where do I set the trusted Proxy?
 

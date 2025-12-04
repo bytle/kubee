@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
 # shellcheck source=../../bash-lib/lib/bashlib-error.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+source "bashlib-error.sh"
 error::set_strict_mode
 error::set_trap
 # shellcheck source=../../bash-lib/lib/bashlib-echo.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+source "bashlib-echo.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-doc.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+source "bashlib-doc.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-command.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
+source "bashlib-command.sh"
 
 synopsis(){
 

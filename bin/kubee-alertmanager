@@ -2,13 +2,13 @@
 
 
 # shellcheck source=./bashlib-error.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+source "bashlib-error.sh"
 error::set_strict_mode
 error::set_trap
 # shellcheck source=./bashlib-echo.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+source "bashlib-echo.sh"
 # shellcheck source=./bashlib-doc.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+source "bashlib-doc.sh"
 
 post_alerts(){
   # Note on the post data
@@ -227,4 +227,3 @@ case $API_METHOD in
     echo::err "The method $API_METHOD is unknown"
     exit 1
 esac
-

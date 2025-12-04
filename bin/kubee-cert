@@ -2,7 +2,7 @@
 
 
 # shellcheck source=./bashlib-doc.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+source "bashlib-doc.sh"
 
 synopsis(){
 
@@ -184,10 +184,3 @@ case "$COMMAND" in
     echo::err "command $COMMAND not found"
     exit 1
 esac
-
-
-
-
-
-
-

@@ -4,7 +4,7 @@
 
 
 # shellcheck source=./bashlib-doc.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+source "bashlib-doc.sh"
 
 
 

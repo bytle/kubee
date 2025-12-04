@@ -3,9 +3,9 @@
 set -TCEeuo pipefail
 
 # shellcheck source=../../bash-lib/lib/bashlib-doc.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+source "bashlib-doc.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-array.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-array.sh"
+source "bashlib-array.sh"
 
 ACTUAL_CHART_DRIVER="kubee-helmet-helm";
 

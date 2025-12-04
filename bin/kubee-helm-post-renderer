@@ -12,17 +12,17 @@ exec 1>&2
 
 # A post renderer to integrate kustomize and jsonnet
 # shellcheck source=../..//bash-lib/lib/bashlib-error.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+source "bashlib-error.sh"
 error::set_trap
 set -TCEeuo pipefail
 # shellcheck source=../../bash-lib/lib/bashlib-echo.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+source "bashlib-echo.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-doc.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+source "bashlib-doc.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-bash.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-bash.sh"
+source "bashlib-bash.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-command.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
+source "bashlib-command.sh"
 # source kubee-lib.sh does not work if the kubee bin directory is not in PATH
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 # shellcheck source=kubee-lib.sh

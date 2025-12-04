@@ -1,21 +1,34 @@
 #!/usr/bin/env bash
 
+# Bashlib
+if [ "${BASHLIB_PATH:-}" == "" ]; then
+  SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")" && pwd)"
+  BASHLIB_PATH="$SCRIPT_DIR/../lib"
+  if [ ! -d "$BASHLIB_PATH" ]; then
+    echo "BASHLIB_PATH was not set and could not be found"
+    exit 1
+  fi
+fi
+export PATH="$BASHLIB_PATH:$PATH"
+
 # shellcheck source=../..//bash-lib/lib/bashlib-error.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-error.sh"
+source "bashlib-error.sh"
 error::set_strict_mode
 error::set_trap
 # shellcheck source=../../bash-lib/lib/bashlib-doc.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+source "bashlib-doc.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-echo.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+source "bashlib-echo.sh"
 # shellcheck source=../../bash-lib/lib/bashlib-bash.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-bash.sh"
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+source "bashlib-bash.sh"
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+# add to the path as we source the scripts
+export PATH="$SCRIPT_DIR:$PATH"
 # shellcheck source=./kubee-lib.sh
-source "${SCRIPT_DIR}/kubee-lib.sh"
+source "kubee-lib.sh"
 
-synopsis(){
-  cat <<EOF
+synopsis() {
+  cat << EOF
 \`\`\`bash
 $(basename "$0") [kubee options] command args
 \`\`\`
@@ -48,8 +61,8 @@ EOF
 }
 
 if [ "${1:-}" == "synopsis" ]; then
-   synopsis
-   exit
+  synopsis
+  exit
 fi
 
 # Kubee Home (Ie installation path)
@@ -82,10 +95,9 @@ export KUBEE_GARBAGE_COLLECTOR="on"
 # this command : `getopt -l "cluster:,debug,namespace:,print-commands" -o "c:n:" -- "$@"`
 # will fail with: `kubee helmet template kubernetes-monitoring --out`
 KUBEE_COMMAND=""
-while [[ $# -gt 0 ]]
-do
-   case  "$1" in
-    -n|--namespace)
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -n | --namespace)
       shift
       if [ "${1:-}" == "" ]; then
         echo::err "The -n or --namespace flag expects a value"
@@ -93,7 +105,7 @@ do
       fi
       KUBEE_CONNECTION_NAMESPACE="$1"
       ;;
-    -c|--cluster)
+    -c | --cluster)
       shift
       KUBEE_CLUSTER_NAME="$1"
       ;;
@@ -101,11 +113,11 @@ do
       KUBEE_GARBAGE_COLLECTOR="off"
       ;;
     "--print-commands")
-      BASHLIB_ECHO_LEVEL="$BASHLIB_ECHO_COMMAND_LEVEL";
+      BASHLIB_ECHO_LEVEL="$BASHLIB_ECHO_COMMAND_LEVEL"
       ;;
     "--debug")
-      BASHLIB_ECHO_LEVEL="$BASHLIB_ECHO_DEBUG_LEVEL";
-      COMMAND_STDOUT_FD=$(echo::get_file_descriptor);
+      BASHLIB_ECHO_LEVEL="$BASHLIB_ECHO_DEBUG_LEVEL"
+      COMMAND_STDOUT_FD=$(echo::get_file_descriptor)
       ;;
     *)
       echo::debug "Command ($1)"
@@ -113,15 +125,14 @@ do
       shift
       break
       ;;
-   esac
-   shift
+  esac
+  shift
 done
 
-
 if [ "$KUBEE_COMMAND" = "" ]; then
-    doc::help
-    echo::err "A command is mandatory"
-    exit 1
+  doc::help
+  echo::err "A command is mandatory"
+  exit 1
 fi
 # Help
 if [[ "$KUBEE_COMMAND" =~ "-h"|"--help"|"help" ]]; then
@@ -138,37 +149,38 @@ bash::trap "exit_code=\$?; if [ \$exit_code -ne 0 ]; then echo -e \"${BASHLIB_ER
 
 case "$KUBEE_COMMAND" in
   "cluster")
-     source "${KUBEE_BIN}/kubee-cluster" "$@" || error::exit $?
+    source "kubee-cluster" "$@" || error::exit $?
     ;;
   "app")
-    source "${KUBEE_BIN}/kubee-app" "$@" || error::exit $?
+    source "kubee-app" "$@" || error::exit $?
     ;;
   "helmet")
-    source "${KUBEE_BIN}/kubee-helmet" "$@"
+    source "kubee-helmet" "$@"
     ;;
   "helm")
-    source "${KUBEE_BIN}/kubee-helm" "$@" || error::exit $?
+    source "kubee-helm" "$@" || error::exit $?
     ;;
   "kubectl")
-    source "${KUBEE_BIN}/kubee-kubectl" "$@" || error::exit $?
+    source "kubee-kubectl" "$@" || error::exit $?
     ;;
   "cert")
-    source "${KUBEE_BIN}/kubee-cert" "$@" || error::exit $?
+    source "kubee-cert" "$@" || error::exit $?
     ;;
   "cmctl")
-      source "${KUBEE_BIN}/kubee-cmctl" "$@" || error::exit $?
-      ;;
+    source "kubee-cmctl" "$@" || error::exit $?
+    ;;
   "jwt")
-      # Deprecated
-      source "${KUBEE_BIN}/kubee-jwt" "$@" || error::exit $?
-      ;;
+    # Deprecated
+    source "kubee-jwt" "$@" || error::exit $?
+    ;;
   *)
     doc::help synopsis
-    echo::err  "Command $KUBEE_COMMAND is unknown"
+    echo::err "Command $KUBEE_COMMAND is unknown"
     exit 1
+    ;;
 esac
 
 # Cleaning
-if [ "$BASHLIB_ECHO_LEVEL" -gt "$BASHLIB_ECHO_COMMAND_LEVEL" ] && [ "$KUBEE_GARBAGE_COLLECTOR" == "on" ] ; then
+if [ "$BASHLIB_ECHO_LEVEL" -gt "$BASHLIB_ECHO_COMMAND_LEVEL" ] && [ "$KUBEE_GARBAGE_COLLECTOR" == "on" ]; then
   echo::eval "echo 'Cleaning Shm' > $COMMAND_STDOUT_FD; rm -f $KUBEE_RUNTIME_DIR/*"
 fi

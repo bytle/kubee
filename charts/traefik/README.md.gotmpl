@@ -26,6 +26,11 @@ The [traefik-crds chart](../traefik-crds/README.md) is installed automatically i
 {{ template "chart.valuesSection" . }}
 | traefik | object | | [the Optional Traefik Chart values](https://github.com/traefik/traefik-helm-chart/blob/v{{ template "chart.appVersion" . }}/traefik/values.yaml) |
 
+## Install
+
+```bash
+kubee --cluster cluster-name helmet play traefik
+```
 
 ## FAQ
 ### Where do I set the trusted Proxy?

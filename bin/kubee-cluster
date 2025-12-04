@@ -2,7 +2,7 @@
 
 
 # shellcheck source=../../bash-lib/lib/bashlib-template.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
+source "bashlib-template.sh"
 
 
 

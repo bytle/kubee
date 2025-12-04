@@ -2,7 +2,7 @@
 
 
 # shellcheck source=../../bash-lib/lib/bashlib-doc.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-doc.sh"
+source "bashlib-doc.sh"
 
 # The synopsis function is required by the doc::usage
 synopsis(){
@@ -70,4 +70,3 @@ case "$COMMAND" in
     echo::err  "Command $COMMAND is unknown"
     exit 1
 esac
-

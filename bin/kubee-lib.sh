@@ -6,17 +6,17 @@
 #
 
 # shellcheck source=./bashlib-array.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-array.sh"
+source "bashlib-array.sh"
 # shellcheck source=./bashlib-echo.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-echo.sh"
+source "bashlib-echo.sh"
 # shellcheck source=./bashlib-command.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-command.sh"
+source "bashlib-command.sh"
 # shellcheck source=./bashlib-bash.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-bash.sh"
+source "bashlib-bash.sh"
 # shellcheck source=./bashlib-path.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-path.sh"
+source "bashlib-path.sh"
 # shellcheck source=./bashlib-template.sh
-source "${BASHLIB_LIBRARY_PATH:-}${BASHLIB_LIBRARY_PATH:+/}bashlib-template.sh"
+source "bashlib-template.sh"
 
 
 # @description
@@ -794,4 +794,3 @@ kubee::get_chart_directory(){
   return 1
 
 }
-
