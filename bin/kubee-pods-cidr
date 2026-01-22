@@ -31,6 +31,8 @@ if [[ $HELP =~ -h|help ]]; then
   exit
 fi
 
+kubee::set_kubeconfig_env || error::exit $?
+
 ######################
 # Main
 ######################

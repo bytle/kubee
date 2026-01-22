@@ -1,7 +1,6 @@
 version: '3'
 
 tasks:
-
   # Generate the template in the out directory
   tpl:
     cmds:
@@ -31,26 +30,31 @@ tasks:
   # Generate the values.schema.json
   schema:
     cmds:
-        - |
-          COMMAND="helm schema --chart-search-root {{.USER_WORKING_DIR}} --helm-docs-compatibility-mode -k additionalProperties"
-          # dependency filter is due to this Traefik error
-          # FATA[2025-03-11T14:44:41+01:00] Error while parsing comment of key kind: yaml: found character that cannot start any token 
-          # Error: plugin "schema" exited with error
-          DEPENDENCIES_FILTER=$(yq '[.dependencies[].name] | filter(match("kubee-.*")) | join (" ")' {{.USER_WORKING_DIR}}/Chart.yaml)
-          if [ "$DEPENDENCIES_FILTER" != "" ]; then
-            COMMAND="$COMMAND --dependencies-filter $DEPENDENCIES_FILTER"
-          fi;
-          echo "Executing: $COMMAND"
-          eval "$COMMAND"
+      - |
+        COMMAND="helm schema --chart-search-root {{.USER_WORKING_DIR}} --helm-docs-compatibility-mode -k additionalProperties"
+        # dependency filter is due to this Traefik error
+        # FATA[2025-03-11T14:44:41+01:00] Error while parsing comment of key kind: yaml: found character that cannot start any token
+        # Error: plugin "schema" exited with error
+        DEPENDENCIES_FILTER=$(yq '[.dependencies[].name] | filter(match("kubee-.*")) | join (" ")' {{.USER_WORKING_DIR}}/Chart.yaml)
+        if [ "$DEPENDENCIES_FILTER" != "" ]; then
+          COMMAND="$COMMAND --dependencies-filter $DEPENDENCIES_FILTER"
+        fi;
+        echo "Executing: $COMMAND"
+        eval "$COMMAND"
   # Generate all README helm-docs for all charts
   schema-all:
     cmds:
-      - | 
+      - |
         # We don't use find exec because it will not stop at first error
         # xargs exit 255 is mandatory to stop at first error
         find "{{.TASK_DIR}}/charts" -maxdepth 2 -mindepth 1 -type f  -name "Chart.yaml" | xargs -I {} bash -c 'cd "$(dirname "{}")" && echo "Executing on $PWD" && task schema || exit 255'
+  # Generate the bin documentation
+  bin-docs:
+    cmds:
+      - |
+        bashlib-docgen --output-dir site/src/pages/command --md-dir docs/bin bin
   # Generate the current Chart doc
-  docs:
+  helm-docs:
     cmds:
       - |
         if [ "{{.USER_WORKING_DIR}}" == "{{.TASK_DIR}}" ]; then
@@ -60,22 +64,22 @@ tasks:
         helm-docs --chart-search-root={{.USER_WORKING_DIR}} --template-files={{.TASK_DIR}}/.helm-docs/helm-docs-extra-templates.gohtml --template-files=README.md.gotmpl
 
   # Generate the .helmdocsignore file at the project root
-  docs-ignore:
+  helm-docs-ignore:
     cmds:
       - |
         # Create the .helmdocsignore file
-        HELM_DOCS_IGNORE="{{.TASK_DIR}}/.helmdocsignore"        
+        HELM_DOCS_IGNORE="{{.TASK_DIR}}/.helmdocsignore"
         rm "$HELM_DOCS_IGNORE"
         echo "# Ignore charts dependencies directories" >> "$HELM_DOCS_IGNORE"
         echo "# Should be at the root of repo see issue: https://github.com/norwoodj/helm-docs/issues/206" >> "$HELM_DOCS_IGNORE"
         find "charts" -maxdepth 2 -mindepth 1 -type d  -name "charts" >> "$HELM_DOCS_IGNORE"
 
   # Generate all README helm-docs for all charts
-  # and the ling
+  # and the lint
   docs-all:
     cmds:
-      - | 
-        find "{{.TASK_DIR}}/charts" -maxdepth 2 -mindepth 1 -type f  -name "Chart.yaml"  | xargs -I {} bash -c 'cd "$(dirname "{}")" && task docs || exit 255'
+      - |
+        find "{{.TASK_DIR}}/charts" -maxdepth 2 -mindepth 1 -type f  -name "Chart.yaml"  | xargs -I {} bash -c 'cd "$(dirname "{}")" && task helm-docs || exit 255'
       - task readme
       - task docs-lint
 

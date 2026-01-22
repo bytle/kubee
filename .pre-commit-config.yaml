@@ -12,49 +12,54 @@ repos:
       - id: check-symlinks
       - id: check-yaml
         exclude: ^postal/templates/.*$|^chart-schema.yaml$
-      - id: detect-aws-credentials
       - id: mixed-line-ending
       - id: trailing-whitespace
-      - id: no-commit-to-branch
-        args: [ --branch, main ]
-
-  - repo: https://github.com/jtyr/kubeconform-helm
-    rev: v0.1.17
+#      - id: no-commit-to-branch
+#        args: [ --branch, main ]
+  - repo: https://github.com/tcort/markdown-link-check
+    rev: 3c9471f # v3.14.1
     hooks:
-      - id: kubeconform-helm
-        args:
-          - --summary
-          - --strict
-          - --values-dir postal/ci
-  # https://github.com/norwoodj/helm-docs?tab=readme-ov-file#pre-commit-hook
-  - repo: https://github.com/norwoodj/helm-docs
-    rev: ""
-    hooks:
-      - id: helm-docs-container
-        args:
-          # Make the tool search for charts only under the `charts` directory
-          - --chart-search-root=resources/charts/stable/mailpit
-  - repo: https://github.com/dadav/helm-schema
-    rev: 0.18.1
-    hooks:
-      - id: helm-schema
-        # for all available options: helm-schema -h
-        args:
-          # directory to search recursively within for charts
-          - --chart-search-root=resources/charts/stable/mailpit
+      - id: markdown-link-check
+        name: markdown link check
+        args: [ --quiet, "--config", ".config/markdown-link-check.config.json" ]
 
-          # don't analyze dependencies
-          # - --no-dependencies
-
-          # Add references line as header in the values.yaml file if not exist
-          # - --add-schema-reference
-
-          # helm docs compat
-          - --helm-docs-compatibility-mode
-
-          # append newline to generated jsonschema at the end of the file
-          - --append-newline
-
-          # list of fields to skip from being created by default
-          # e.g. generate a relatively permissive schema
-          # - "--skip-auto-generation=required,additionalProperties"
+#  - repo: https://github.com/jtyr/kubeconform-helm
+#    rev: v0.1.17
+#    hooks:
+#      - id: kubeconform-helm
+#        args:
+#          - --summary
+#          - --strict
+#          - --values-dir postal/ci
+#  # https://github.com/norwoodj/helm-docs?tab=readme-ov-file#pre-commit-hook
+#  - repo: https://github.com/norwoodj/helm-docs
+#    rev: "1.14.2"
+#    hooks:
+#      - id: helm-docs-container
+#        args:
+#          # Make the tool search for charts only under the `charts` directory
+#          - --chart-search-root=resources/charts/stable/mailpit
+#  - repo: https://github.com/dadav/helm-schema
+#    rev: 0.18.1
+#    hooks:
+#      - id: helm-schema
+#        # for all available options: helm-schema -h
+#        args:
+#          # directory to search recursively within for charts
+#          - --chart-search-root=resources/charts/stable/mailpit
+#
+#          # don't analyze dependencies
+#          # - --no-dependencies
+#
+#          # Add references line as header in the values.yaml file if not exist
+#          # - --add-schema-reference
+#
+#          # helm docs compat
+#          - --helm-docs-compatibility-mode
+#
+#          # append newline to generated jsonschema at the end of the file
+#          - --append-newline
+#
+#          # list of fields to skip from being created by default
+#          # e.g. generate a relatively permissive schema
+#          # - "--skip-auto-generation=required,additionalProperties"

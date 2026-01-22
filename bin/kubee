@@ -154,6 +154,9 @@ case "$KUBEE_COMMAND" in
   "app")
     source "kubee-app" "$@" || error::exit $?
     ;;
+  "pods")
+    source "kubee-pods" "$@" || error::exit $?
+    ;;
   "helmet")
     source "kubee-helmet" "$@"
     ;;

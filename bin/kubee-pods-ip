@@ -7,9 +7,26 @@
 #
 
 set -Eeuo pipefail
+
+if [ "${BASHLIB_PATH:-}" == "" ]; then
+  SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")" && pwd)"
+  BASHLIB_PATH="$SCRIPT_DIR/../lib"
+  if [ ! -d "$BASHLIB_PATH" ]; then
+    echo "BASHLIB_PATH was not set and could not be found"
+    exit 1
+  fi
+fi
+export PATH="$BASHLIB_PATH:$PATH"
+
 source bashlib-echo.sh
 source bashlib-error.sh
 error::set_trap
+
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+# add to the path as we source the scripts
+export PATH="$SCRIPT_DIR:$PATH"
+# shellcheck source=./kubee-lib.sh
+source "kubee-lib.sh"
 
 ######################
 # Main
@@ -40,9 +57,9 @@ if [[ $NODE_NAME =~ -h|help ]]; then
   exit
 fi
 
+
 # Get env
-# Get env
-source kubee-env || error::exit $?
+kubee::set_kubeconfig_env || error::exit $?
 
 
 # Check if the node name is provided

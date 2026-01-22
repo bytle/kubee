@@ -1,23 +1,20 @@
 #!/usr/bin/env bash
 
-
 # shellcheck source=../../bash-lib/lib/bashlib-template.sh
 source "bashlib-template.sh"
-
-
-
 
 # Assign the first argument to a string
 CLUSTER_COMMAND="${1:-}"
 if [ "$CLUSTER_COMMAND" != "" ]; then
-  shift  # Remove the first argument from the argument list
+  shift # Remove the first argument from the argument list
 fi
-
-
 
 case $CLUSTER_COMMAND in
   "shell")
     source kubee-app-shell "busybox" "$@" || error::exit $?
+    ;;
+  "pods")
+    source kubee-pods-list
     ;;
   *)
     # K3s Cluster Chart Values

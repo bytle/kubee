@@ -1,13 +1,53 @@
 #!/usr/bin/env bash
 
-if [[ "${1:-}" =~ "synopsis"|"-h"|"--help" ]]; then
-  basename "$0"
-  echo "Return all pods on the cluster"
-  exit 0
+# shellcheck source=../../bash-lib/lib/bashlib-doc.sh
+source "bashlib-doc.sh"
+
+# The synopsis function is required by the doc::usage
+synopsis() {
+  cat << EOF
+\`\`\`bash
+kubee pods command options
+\`\`\`
+
+where:
+* \`command\` can be:
+  * \`ip\`      - List the pods ip
+  * \`list\`    - List the pods
+  * \`cidr\`    - List the pods CIDR
+EOF
+
+}
+
+if [ "${1:-}" == "synopsis" ]; then
+  synopsis
+  exit
 fi
 
-# Get env
-source kubee-env || error::exit $?
+# Get the command
+COMMAND=${1:-}
+if [ "$COMMAND" = "" ]; then
+  doc::help
+  echo::err "A command is mandatory"
+  exit 1
+fi
+echo::debug "Command Name: $COMMAND"
+# Remove the command argument from the argument list
+shift
 
-# Do the work
-kubectl get pod --all-namespaces  -o custom-columns='NAME:.metadata.name,NAMESPACE:.metadata.namespace'
+case "$COMMAND" in
+  "ip")
+    source "$KUBEE_BIN/kubee-pods-ip" "$@" || error::exit $?
+    ;;
+  "list")
+    source "$KUBEE_BIN/kubee-pods-list" "$@" || error::exit $?
+    ;;
+  "cidr")
+    source "$KUBEE_BIN/kubee-pods-cidr" "$@" || error::exit $?
+    ;;
+  *)
+    doc::help synopsis
+    echo::err "Command $COMMAND is unknown"
+    exit 1
+    ;;
+esac

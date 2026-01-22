@@ -1,2 +1,6 @@
 .idea
 out
+# command is generated from docs/bin
+site/src/pages/command
+# man is also generated
+docs/man
