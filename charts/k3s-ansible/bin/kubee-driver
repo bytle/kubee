@@ -192,8 +192,6 @@ install_collections_required() {
   echo::debug "Installing ansible collections requirements:"
   local SCRIPT_DIR
   SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
-  # Unfortunately, all git collections are installed every time
-  # while the one published with a fix version are not
   ansible-galaxy collection install -r "$SCRIPT_DIR/../ansible-requirements.yml" -p "$ANSIBLE_COLLECTIONS_PATH" > "$COMMAND_STDOUT_FD" 2>&1
 }
 
@@ -204,7 +202,10 @@ main() {
   # Own collections path to check if it was already installed
   export ANSIBLE_COLLECTIONS_PATH="$HOME/.kubee/collections"
 
-  # Check if installed
+  # Trick to check if installed
+  # Unfortunately, all git collections requirements are installed every time
+  # while the one published with a fix version are not
+  # the kubee-driver command ansible-update will reinstall them
   if [ ! -d "$ANSIBLE_COLLECTIONS_PATH/ansible_collections/k3s" ]; then
     echo::info "Ansible collections not found, installation"
     install_collections_required

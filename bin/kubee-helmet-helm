@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
 # Helm wrapper that installs Helm Chart on the steroid
 
-
 # The synopsis function is required by the doc::usage
-synopsis(){
+synopsis() {
 
-  local CLI_NAME;
-  CLI_NAME=$(basename "$(doc::get_cli_command_words)" | tr "-" " ")
   cat << EOF
 \`\`\`bash
 kubee helmet command options chartName
@@ -15,14 +12,15 @@ kubee helmet command options chartName
 where:
 * \`command\` can be:
   * \`crds\`                - Lists the CRD dependencies
+  * \`show\`                - Show chart information
   * \`install\`             - Install a Kubee Chart
   * \`ping\`                - Verify the connection to the cluster api
   * \`play\`                - Upgrade or install a Kubee Chart
   * \`template\`            - Template a Kubee Chart
      * The following options are supported
-       * \`-s, --show-only\`     : Show only one template
-       * \`--output-dir string\` : Writes the executed templates to files in output-dir instead of stdout
-       * \`--out string\`        : Writes the executed templates to the \`out\` relative directory
+       * \`-s, --show-only templateName\` : Show only one template
+       * \`--output-dir string\`          : Writes the executed templates to files in output-dir instead of stdout
+       * \`--out string\`                 : Writes the executed templates to the \`out\` relative directory
   * \`update-dependencies\` - Update the charts directory with the dependencies (dev only)
     * The following options are supported
        * \`-f, --force\`         : Delete all existing dependencies charts
@@ -35,8 +33,8 @@ EOF
 }
 
 if [ "${1:-}" == "synopsis" ]; then
-   synopsis
-   exit
+  synopsis
+  exit
 fi
 
 # @description
@@ -56,7 +54,6 @@ is_helm_chart_installed() {
   # mariadb-operator-crds   mariadb         1               2025-03-08 12:34:19.800138202 +0100 CET deployed        mariadb-operator-crds-0.37.1    0.0.0
   local CHART_RELEASE_VERSION="$3"
   local CHART_YAML_NAME="$4"
-
 
   if [ "$CHART_RELEASE_NAME" == "" ]; then
     echo::err "Internal: the release name should not be empty"
@@ -93,7 +90,6 @@ is_helm_chart_installed() {
     exit 1
   fi
 
-
   # `helm list` does not give back the version, we need to derive it from the `chart` property value (ie ACTUAL_CHART_NAME)
   # ACTUAL_CHART_NAME: kubee-cert-manager-crds-1.17.1-xxx
   # We take don't take the last part because semver allows also a `-` sep
@@ -106,12 +102,9 @@ is_helm_chart_installed() {
 
   echo::info "Chart release $CHART_RELEASE_NAME with version $CHART_RELEASE_VERSION is already installed."
 
-
 }
 
-
-
-apply(){
+apply() {
 
   # The final helm command (installation, or template)
   local HELM_COMMAND=("helm")
@@ -124,37 +117,37 @@ apply(){
   fi
   shift
   case "$COMMAND" in
-      "play")
-        HELM_COMMAND+=( "upgrade" "--install" )
-        echo::info "Playing chart $CHART_NAME  (ie upgrade or install if not present)"
-        kubee::set_kubeconfig_env_and_check
-        ;;
-      "upgrade")
-        HELM_COMMAND+=( "upgrade" )
-        echo::info "Upgrade package $CHART_NAME"
-        kubee::set_kubeconfig_env_and_check
-        ;;
-      "install")
-        HELM_COMMAND+=( "install" )
-        echo::info "Install package $CHART_NAME"
-        kubee::set_kubeconfig_env_and_check
-        ;;
-      "template")
-        HELM_COMMAND+=( "template" )
-        echo::info "Templating package $CHART_NAME "
-        # Output
-        if [ "$OPTION_OUTPUT_DIR" != "" ]; then
-          HELM_COMMAND+=("--output-dir" "$(dirname "$CHART_OUTPUT_DIR")")
-        fi
-        # Options
-        if [ "$OPTION_SHOW_ONLY" != "" ]; then
-          HELM_COMMAND+=("--show-only" "$OPTION_SHOW_ONLY")
-        fi
-        ;;
-      *)
-        echo::err "The command $COMMAND is unknown"
-        return 1
-        ;;
+    "play")
+      HELM_COMMAND+=("upgrade" "--install")
+      echo::info "Playing chart $CHART_NAME  (ie upgrade or install if not present)"
+      kubee::set_kubeconfig_env_and_check
+      ;;
+    "upgrade")
+      HELM_COMMAND+=("upgrade")
+      echo::info "Upgrade package $CHART_NAME"
+      kubee::set_kubeconfig_env_and_check
+      ;;
+    "install")
+      HELM_COMMAND+=("install")
+      echo::info "Install package $CHART_NAME"
+      kubee::set_kubeconfig_env_and_check
+      ;;
+    "template")
+      HELM_COMMAND+=("template")
+      echo::info "Templating package $CHART_NAME "
+      # Output
+      if [ "$OPTION_OUTPUT_DIR" != "" ]; then
+        HELM_COMMAND+=("--output-dir" "$(dirname "$CHART_OUTPUT_DIR")")
+      fi
+      # Options
+      if [ "$OPTION_SHOW_ONLY" != "" ]; then
+        HELM_COMMAND+=("--show-only" "$OPTION_SHOW_ONLY")
+      fi
+      ;;
+    *)
+      echo::err "The command $COMMAND is unknown"
+      return 1
+      ;;
   esac
 
   # Update dependencies if they are missing in the charts dir
@@ -164,9 +157,9 @@ apply(){
   # HELM_COMMAND+=("--dependency-update")
   # The subdirectory (not local as it's used in sub function)
   CHART_CHARTS_DIRECTORY="$CHART_DIRECTORY/charts"
-  if [ -z "$(ls -A "$CHART_CHARTS_DIRECTORY" 2>/dev/null)" ]; then
-      # directory does not exists or is empty
-      update-dependencies
+  if [ -z "$(ls -A "$CHART_CHARTS_DIRECTORY" 2> /dev/null)" ]; then
+    # directory does not exists or is empty
+    update-dependencies
   fi
   # values and namespace
   # For all chart expected for crd chart, the values and namespace
@@ -188,28 +181,25 @@ apply(){
     "--post-renderer-args" "--chart-dir=$CHART_DIRECTORY"
     "--post-renderer-args" "--chart-namespace=$CHART_NAMESPACE"
     "--post-renderer-args" "--chart-output-dir=$CHART_OUTPUT_DIR"
-    )
+  )
   # We have jsonnet only CRD
   # crd do not have any values file but we bash we can't pass empty
   if [ "$CHART_TYPE" != "crds" ]; then
-      HELM_COMMAND+=("--post-renderer-args" "--chart-values-path=$CHART_VALUES_PATH")
+    HELM_COMMAND+=("--post-renderer-args" "--chart-values-path=$CHART_VALUES_PATH")
   fi
-
 
   HELM_COMMAND+=("--namespace" "$CHART_NAMESPACE")
 
-
   if [[ "$COMMAND" =~ 'play'|'install' ]]; then
     # Create namespace only on install
-    HELM_COMMAND+=("--create-namespace");
+    HELM_COMMAND+=("--create-namespace")
   fi
-
 
   if [[ "$COMMAND" =~ "play"|"upgrade"|"install" ]]; then
     # Install CRD first
     if ! kubee_crds_function "play"; then
-        echo::err "An error has occurred while installing the CRD charts"
-        return 1
+      echo::err "An error has occurred while installing the CRD charts"
+      return 1
     fi
   fi
 
@@ -230,13 +220,11 @@ apply(){
   local CHART_RELEASE_NAME="$CHART_NAME"
   HELM_COMMAND+=("$CHART_RELEASE_NAME" "$CHART_DIRECTORY")
 
-
   # Working directory is the cluster directory
   # Why? To be able to set relative path to the cluster object such as certificate
   # example: "--set-file kubee.traefik.defaultCertificate.cert=cert/kubee.dev+1.pem"
   echo::eval "pushd $KUBEE_CLUSTER_DIR 1>$COMMAND_STDOUT_FD"
   bash::trap "popd 1>$COMMAND_STDOUT_FD" EXIT
-
 
   echo::info "Executing Helm $COMMAND"
   # Redirect the error to capture it
@@ -255,10 +243,10 @@ apply(){
   # Where to send the output (by default stdout)
   local HELM_STD="/dev/stdout"
   if [ "$COMMAND" == "template" ] && [ "$OPTION_OUTPUT_DIR" != "" ]; then
-      # Silence for template command
-      # wrote out/xxx/templates/xxx.yml
-      echo::debug "Silence Template command with output dir option"
-      HELM_STD="$COMMAND_STDOUT_FD"
+    # Silence for template command
+    # wrote out/xxx/templates/xxx.yml
+    echo::debug "Silence Template command with output dir option"
+    HELM_STD="$COMMAND_STDOUT_FD"
   fi
   echo::debug "Output Helm to $HELM_STD"
 
@@ -281,7 +269,6 @@ apply(){
     printf "%s\n" "$HELM_OUTPUT" >| "$HELM_STD"
   fi
 
-
   # Can we Wait with that?
   # kubectl wait --for=condition=Ready pods -l  app.kubernetes.io/name=prometheus-operator
   #
@@ -295,17 +282,13 @@ apply(){
 
 }
 
-
-
-ping(){
+ping() {
 
   # Kubectl env
   kubee::set_kubeconfig_env_and_check
   echo::eval "kubectl cluster-info"
 
 }
-
-
 
 # Crds first
 # CRD first installation is becoming a standard
@@ -318,22 +301,19 @@ ping(){
 # kubectl apply --server-side --force-conflicts -f https://github.com/grafana/grafana-operator/releases/download/v5.15.1/crds.yaml
 #```
 # If this is not a CRD chart that we install and that the CRD charts exists
-kubee_crds_function(){
+kubee_crds_function() {
 
   local CRD_COMMAND=${1}
-
 
   if [ "$CHART_TYPE" != "app" ]; then
     echo::debug "Chart is not an app chart. No Crd dependencies"
     return
   fi
 
-
   local CHART_FILE_PATH="$CHART_DIRECTORY/Chart.yaml"
 
-
   # Crd defined in Chart.yaml ?
-  local CHART_CRDS_YAML;
+  local CHART_CRDS_YAML
   local HELM_CRDS_ANNOTATIONS_ADDRESS='.annotations."chart.kubee/crds"'
   CHART_CRDS_YAML=$(echo::eval "yq '$HELM_CRDS_ANNOTATIONS_ADDRESS' $CHART_FILE_PATH")
   if [ "$CHART_CRDS_YAML" == "null" ] || [ "$CHART_CRDS_YAML" == "" ]; then
@@ -380,7 +360,7 @@ kubee_crds_function(){
     fi
 
     ## Command executions
-    local KUBE_CRDS_COMMAND;
+    local KUBE_CRDS_COMMAND
     # Garbage collection is disable on all command
     # because we install just after the chart
     local KUBEE_BASE_COMMAND="kubee -n $CHART_NAMESPACE --no-garbage-collection"
@@ -404,7 +384,6 @@ kubee_crds_function(){
       return 1
     fi
 
-
     # Upgrade / install
     local KUBE_CRDS_COMMAND="$KUBEE_BASE_COMMAND helm upgrade $HELM_CHART_CRDS_RELEASE_NAME $HELM_CHART_CRDS_NAME --version $HELM_CHART_CRDS_VERSION --repo $HELM_CHART_CRDS_REPO_URI --install -n $CHART_NAMESPACE"
     echo::info "Installing helm CRD Chart $HELM_CHART_CRDS_RELEASE_NAME in namespace $CHART_NAMESPACE"
@@ -414,34 +393,31 @@ kubee_crds_function(){
 
   done <<< "$CHART_CRDS_CSV"
 
-
 }
 
-update-dependencies(){
+update-dependencies() {
 
-  local ACTUAL_CHART_FILE="$CHART_DIRECTORY/Chart.yaml";
-
+  local ACTUAL_CHART_FILE="$CHART_DIRECTORY/Chart.yaml"
 
   # The charts dependency directory
-  local CHART_CHARTS_DIRECTORY="$CHART_DIRECTORY/charts";
+  local CHART_CHARTS_DIRECTORY="$CHART_DIRECTORY/charts"
   if [ "${OPTION_FORCE:-}" != "" ]; then
     echo::debug "Force called, deleting the charts directory"
     echo::eval "rm -rf $CHART_CHARTS_DIRECTORY"
   fi
   mkdir -p "$CHART_CHARTS_DIRECTORY"
 
-
   # Add dependencies
-  local DEPENDENCIES;
+  local DEPENDENCIES
   DEPENDENCIES="$(yq -r '.dependencies[] | [ (.name // "") + "," + (.repository // "") + "," + ( .version // "")] | join("\n")' "$ACTUAL_CHART_FILE")"
   if [ "$DEPENDENCIES" != "" ]; then
     # Loop over the dependencies
     while IFS=, read -r DEPENDENCY_CHART_NAME DEPENDENCY_CHART_REPOSITORY DEPENDENCY_CHART_VERSION; do
 
       if [ "$DEPENDENCY_CHART_NAME" == "" ] || [ "$DEPENDENCY_CHART_NAME" == "null" ]; then
-            echo::err "All dependency should have an name"
-            echo::err "The repository $DEPENDENCY_CHART_REPOSITORY does not have one"
-            return 1
+        echo::err "All dependency should have an name"
+        echo::err "The repository $DEPENDENCY_CHART_REPOSITORY does not have one"
+        return 1
       fi
 
       # The unique path
@@ -458,85 +434,85 @@ update-dependencies(){
       # The repository scheme
       local DEPENDENCY_CHART_SCHEME="${DEPENDENCY_CHART_REPOSITORY%%:*}"
       case "$DEPENDENCY_CHART_SCHEME" in
-          "file")
-            # Local
-            # The name of the chart is the path to the chart directory
-            # Delete the file scheme (not supported by `helm get values`)
-            local LOCAL_DEPENDENCY_CHART_DIR
-            LOCAL_DEPENDENCY_CHART_DIR="$(realpath "$CHART_DIRECTORY"/"${DEPENDENCY_CHART_REPOSITORY#"file://"}")"
-            echo::info "$DEPENDENCY_CHART_NAME: Creating Charts Dep"
+        "file")
+          # Local
+          # The name of the chart is the path to the chart directory
+          # Delete the file scheme (not supported by `helm get values`)
+          local LOCAL_DEPENDENCY_CHART_DIR
+          LOCAL_DEPENDENCY_CHART_DIR="$(realpath "$CHART_DIRECTORY"/"${DEPENDENCY_CHART_REPOSITORY#"file://"}")"
+          echo::info "$DEPENDENCY_CHART_NAME: Creating Charts Dep"
 
-            # Create it if it does not exists
-            mkdir -p "$DEPENDENCY_DIR_PATH_IN_CHARTS"
+          # Create it if it does not exists
+          mkdir -p "$DEPENDENCY_DIR_PATH_IN_CHARTS"
 
-            local LOCAL_DEPENDENCY_FILES=("Chart.yaml" "values.yaml" "values.schema.json" "templates/_helpers.tpl")
-            for LOCAL_DEPENDENCY_FILE_NAME in "${LOCAL_DEPENDENCY_FILES[@]}"; do
+          local LOCAL_DEPENDENCY_FILES=("Chart.yaml" "values.yaml" "values.schema.json" "templates/_helpers.tpl")
+          for LOCAL_DEPENDENCY_FILE_NAME in "${LOCAL_DEPENDENCY_FILES[@]}"; do
 
-              local LOCAL_DEPENDENCY_FILE
-              # Real path fail if the file directory does not exists
-              if ! LOCAL_DEPENDENCY_FILE="$(realpath "$LOCAL_DEPENDENCY_CHART_DIR/$LOCAL_DEPENDENCY_FILE_NAME" 2>"$COMMAND_STDOUT_FD" )"; then
-                echo::debug "Dependency File $LOCAL_DEPENDENCY_FILE_NAME does not exist. Skipping. ($LOCAL_DEPENDENCY_FILE not found)"
-                continue
-              fi
-
-              if [ ! -e "$LOCAL_DEPENDENCY_FILE" ]; then
-                echo::debug "Local Dependency File $LOCAL_DEPENDENCY_FILE_NAME does not exist. Skipping. ($LOCAL_DEPENDENCY_FILE not found)"
-                continue
-              fi
-
-              local TARGET_DEPENDENCY_FILE="$DEPENDENCY_DIR_PATH_IN_CHARTS/$LOCAL_DEPENDENCY_FILE_NAME"
-
-              local TARGET_DEPENDENCY_FILE_DIR
-              TARGET_DEPENDENCY_FILE_DIR=$(dirname "$TARGET_DEPENDENCY_FILE")
-              if [ "$TARGET_DEPENDENCY_FILE_DIR" != "$DEPENDENCY_DIR_PATH_IN_CHARTS" ] && [ ! -e "$TARGET_DEPENDENCY_FILE_DIR" ]; then
-                # If the target dependency file path is a subdirectory
-                # it should be created first
-                echo::debug "Creating the target dir $TARGET_DEPENDENCY_FILE_DIR"
-                echo::eval "mkdir -p $TARGET_DEPENDENCY_FILE_DIR"
-              fi
-
-              if [ -f "$TARGET_DEPENDENCY_FILE" ]; then
-                echo::debug "Dependency File Target $LOCAL_DEPENDENCY_FILE_NAME exists (Skipping $TARGET_DEPENDENCY_FILE)"
-                #We need a force option to do that
-                #echo::eval "rm $TARGET_DEPENDENCY_FILE"
-                continue
-              fi
-
-              echo::debug "Creating target (Source: $LOCAL_DEPENDENCY_FILE, Target: $TARGET_DEPENDENCY_FILE)"
-              if [ "$LOCAL_DEPENDENCY_FILE_NAME" == "Chart.yaml" ]; then
-                echo::eval "cp $LOCAL_DEPENDENCY_FILE $TARGET_DEPENDENCY_FILE"
-                # Delete the dependencies to avoid a circular dependencies
-                # https://github.com/dadav/helm-schema/issues/119
-                echo::eval "yq e 'del(.dependencies)' -i $TARGET_DEPENDENCY_FILE"
-                continue;
-              fi
-
-              # Other file are symlink
-              if ! echo::eval "ln -s $LOCAL_DEPENDENCY_FILE $TARGET_DEPENDENCY_FILE"; then
-                echo::err "Unable to create the symlink"
-                return 1
-              fi
-
-            done
-
-            if [ -e "$DEPENDENCY_FQ_PATH_IN_CHARTS" ]; then
-              echo::debug "Dependency directory found ($DEPENDENCY_FQ_PATH_IN_CHARTS found)"
-            else
-              echo::debug "Creating directory Dependency ($DEPENDENCY_FQ_PATH_IN_CHARTS)"
-              mkdir -p "$DEPENDENCY_FQ_PATH_IN_CHARTS"
+            local LOCAL_DEPENDENCY_FILE
+            # Real path fail if the file directory does not exists
+            if ! LOCAL_DEPENDENCY_FILE="$(realpath "$LOCAL_DEPENDENCY_CHART_DIR/$LOCAL_DEPENDENCY_FILE_NAME" 2> "$COMMAND_STDOUT_FD")"; then
+              echo::debug "Dependency File $LOCAL_DEPENDENCY_FILE_NAME does not exist. Skipping. ($LOCAL_DEPENDENCY_FILE not found)"
+              continue
             fi
 
-            echo::debug "$DEPENDENCY_CHART_NAME: Dep created"
+            if [ ! -e "$LOCAL_DEPENDENCY_FILE" ]; then
+              echo::debug "Local Dependency File $LOCAL_DEPENDENCY_FILE_NAME does not exist. Skipping. ($LOCAL_DEPENDENCY_FILE not found)"
+              continue
+            fi
+
+            local TARGET_DEPENDENCY_FILE="$DEPENDENCY_DIR_PATH_IN_CHARTS/$LOCAL_DEPENDENCY_FILE_NAME"
+
+            local TARGET_DEPENDENCY_FILE_DIR
+            TARGET_DEPENDENCY_FILE_DIR=$(dirname "$TARGET_DEPENDENCY_FILE")
+            if [ "$TARGET_DEPENDENCY_FILE_DIR" != "$DEPENDENCY_DIR_PATH_IN_CHARTS" ] && [ ! -e "$TARGET_DEPENDENCY_FILE_DIR" ]; then
+              # If the target dependency file path is a subdirectory
+              # it should be created first
+              echo::debug "Creating the target dir $TARGET_DEPENDENCY_FILE_DIR"
+              echo::eval "mkdir -p $TARGET_DEPENDENCY_FILE_DIR"
+            fi
+
+            if [ -f "$TARGET_DEPENDENCY_FILE" ]; then
+              echo::debug "Dependency File Target $LOCAL_DEPENDENCY_FILE_NAME exists (Skipping $TARGET_DEPENDENCY_FILE)"
+              #We need a force option to do that
+              #echo::eval "rm $TARGET_DEPENDENCY_FILE"
+              continue
+            fi
+
+            echo::debug "Creating target (Source: $LOCAL_DEPENDENCY_FILE, Target: $TARGET_DEPENDENCY_FILE)"
+            if [ "$LOCAL_DEPENDENCY_FILE_NAME" == "Chart.yaml" ]; then
+              echo::eval "cp $LOCAL_DEPENDENCY_FILE $TARGET_DEPENDENCY_FILE"
+              # Delete the dependencies to avoid a circular dependencies
+              # https://github.com/dadav/helm-schema/issues/119
+              echo::eval "yq e 'del(.dependencies)' -i $TARGET_DEPENDENCY_FILE"
+              continue
+            fi
+
+            # Other file are symlink
+            if ! echo::eval "ln -s $LOCAL_DEPENDENCY_FILE $TARGET_DEPENDENCY_FILE"; then
+              echo::err "Unable to create the symlink"
+              return 1
+            fi
+
+          done
+
+          if [ -e "$DEPENDENCY_FQ_PATH_IN_CHARTS" ]; then
+            echo::debug "Dependency directory found ($DEPENDENCY_FQ_PATH_IN_CHARTS found)"
+          else
+            echo::debug "Creating directory Dependency ($DEPENDENCY_FQ_PATH_IN_CHARTS)"
+            mkdir -p "$DEPENDENCY_FQ_PATH_IN_CHARTS"
+          fi
+
+          echo::debug "$DEPENDENCY_CHART_NAME: Dep created"
 
           ;;
-        "https"|"oci")
+        "https" | "oci")
 
           if [ -e "$DEPENDENCY_FQ_PATH_IN_CHARTS" ]; then
             echo::info "$DEPENDENCY_CHART_NAME: Directory path found skipping"
             # The pull will not work
             # we need a force option to delete
             # Helm Error Error: failed to untar: a file or directory with the name cert-manager/charts/cert-manager-v1.17.1.tgz already exists
-            continue;
+            continue
           fi
           # if the version has changed the directory is still there and should be deleted first
           if [ -e "$DEPENDENCY_DIR_PATH_IN_CHARTS" ]; then
@@ -562,24 +538,25 @@ update-dependencies(){
               fi
               local DEPENDENCY_YAML_URL_SCHEME="${DEPENDENCY_YAML_URL%%:*}"
               case "$DEPENDENCY_YAML_URL_SCHEME" in
-                "https"|"http"|"oci")
-                  DEPENDENCY_FULL_URL="$DEPENDENCY_YAML_URL";
+                "https" | "http" | "oci")
+                  DEPENDENCY_FULL_URL="$DEPENDENCY_YAML_URL"
                   ;;
                 *)
                   # No scheme, relative url
-                  DEPENDENCY_FULL_URL="$DEPENDENCY_CHART_REPOSITORY/$DEPENDENCY_YAML_URL";
+                  DEPENDENCY_FULL_URL="$DEPENDENCY_CHART_REPOSITORY/$DEPENDENCY_YAML_URL"
                   ;;
               esac
               HELM_PULL_COMMAND+=("$DEPENDENCY_FULL_URL")
               ;;
             "oci")
-              DEPENDENCY_FULL_URL="$DEPENDENCY_CHART_REPOSITORY/$DEPENDENCY_CHART_NAME";
+              DEPENDENCY_FULL_URL="$DEPENDENCY_CHART_REPOSITORY/$DEPENDENCY_CHART_NAME"
               HELM_PULL_COMMAND+=("$DEPENDENCY_FULL_URL")
               HELM_PULL_COMMAND+=("--version" "$DEPENDENCY_CHART_VERSION")
               ;;
             *)
               echo::err "Dependency scheme unknown: $DEPENDENCY_CHART_SCHEME"
               return 1
+              ;;
           esac
 
           # Pull
@@ -600,13 +577,14 @@ update-dependencies(){
 
 }
 
-uninstall(){
+uninstall() {
   kubee::set_kubeconfig_env_and_check
   echo::eval "helm --namespace $CHART_NAMESPACE uninstall --wait $CHART_NAME"
 }
 
-main(){
+main() {
 
+  echo::debug "Entering kubee-helmet-helm"
 
   ##########################
   ## Collect the options
@@ -619,48 +597,43 @@ main(){
   OPTION_OUTPUT_DIR=""
   OPTION_SHOW_ONLY=""
   OPTION_FORCE="" # Option to recreate files
-  while [[ $# -gt 0 ]]
-  do
-     case "$1" in
-        "--output-dir"|"-o")
-          shift
-          OPTION_OUTPUT_DIR=${1}
-          shift
-          ;;
-        "--out")
-          shift
-          OPTION_OUTPUT_DIR="out"
-          ;;
-        "--force"|"-f")
-          shift
-          OPTION_FORCE="force"
-          ;;
-        "--skip-schema-validation")
-          shift
-          HELM_EXTRA_FLAGS+=("--skip-schema-validation")
-          ;;
-        "--show-only"|"-s")
-          shift
-          OPTION_SHOW_ONLY=${1}
-          shift
-          ;;
-        "--help"|"-h")
-          synopsis
-          exit
-          ;;
-        "--")
-          shift
-          break;
-          # from now on, $@ contains only the arguments
-          ;;
-     esac
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      "--output-dir" | "-o")
+        shift
+        OPTION_OUTPUT_DIR=${1}
+        ;;
+      "--out")
+        OPTION_OUTPUT_DIR="out"
+        ;;
+      "--force" | "-f")
+        OPTION_FORCE="force"
+        ;;
+      "--skip-schema-validation")
+        HELM_EXTRA_FLAGS+=("--skip-schema-validation")
+        ;;
+      "--show-only" | "-s")
+        shift
+        OPTION_SHOW_ONLY=${1}
+        ;;
+      "--help" | "-h")
+        synopsis
+        exit
+        ;;
+      "--")
+        shift
+        break
+        # from now on, $@ contains only the arguments
+        ;;
+    esac
+    shift
   done
 
   COMMAND=${1:-}
   if [ "$COMMAND" = "" ]; then
-      doc::help
-      echo::err "A command is mandatory"
-      exit 1
+    doc::help
+    echo::err "A command is mandatory"
+    exit 1
   fi
   echo::debug "Command Name: $COMMAND"
   # Remove the command argument from the argument list
@@ -668,7 +641,7 @@ main(){
 
   # Debug ??
   if [ "$BASHLIB_ECHO_LEVEL" == "$BASHLIB_ECHO_DEBUG_LEVEL" ]; then
-    HELM_EXTRA_FLAGS+=("--debug");
+    HELM_EXTRA_FLAGS+=("--debug")
   fi
 
   # CHART_OUTPUT_DIR
@@ -706,7 +679,6 @@ main(){
     # To not kept old manifests, we clean
     echo::eval "$CLEAN_OUT_COMMAND"
   fi
-
 
   # CHART_OUTPUT_DIR
   # * Jsonnet require an output directory
@@ -761,13 +733,13 @@ main(){
     IS_VALUES_FILE_COMMAND=0
   fi
   if [ "$IS_VALUES_FILE_COMMAND" == "1" ] && [ "$CHART_TYPE" != "crds" ]; then
-      # The kubee values
-      # We need them to determine the namespace
-      CHART_VALUES_PATH="$CHART_OUTPUT_VALUES_DIR/values.yml"
-      if ! kubee::print_chart_values "$CHART_NAME" >| "$CHART_VALUES_PATH"; then
-        echo::err "An error has happened while generating the values file for the chart"
-        exit 1
-      fi
+    # The kubee values
+    # We need them to determine the namespace
+    CHART_VALUES_PATH="$CHART_OUTPUT_VALUES_DIR/values.yml"
+    if ! kubee::print_chart_values "$CHART_NAME" >| "$CHART_VALUES_PATH"; then
+      echo::err "An error has happened while generating the values file for the chart"
+      exit 1
+    fi
 
   fi
 
@@ -776,7 +748,7 @@ main(){
     "driver")
       CHART_NAMESPACE="default"
       echo::info "Default Namespace ($CHART_NAMESPACE)"
-    ;;
+      ;;
     "crds")
       # Crd executions
       if [ "${KUBEE_CONNECTION_NAMESPACE:-}" == "" ]; then
@@ -784,7 +756,7 @@ main(){
         return 1
       fi
       CHART_NAMESPACE="$KUBEE_CONNECTION_NAMESPACE"
-    ;;
+      ;;
     *)
       if [ "$IS_VALUES_FILE_COMMAND" == "1" ]; then
         VALUES_NAMESPACE_PATH=".namespace"
@@ -797,14 +769,14 @@ main(){
       else
         CHART_NAMESPACE="$KUBEE_CONNECTION_NAMESPACE"
       fi
+      ;;
   esac
-
 
   case "$COMMAND" in
     "template")
       apply "$COMMAND" "$@" || error::exit $?
       ;;
-    "install"|"play")
+    "install" | "play")
       apply "$COMMAND" "$@" || error::exit $?
       ;;
     "upgrade")
@@ -818,6 +790,9 @@ main(){
       ;;
     "crds")
       kubee_crds_function "list" || error::exit $?
+      ;;
+    "show")
+      echo "Chart Directory Detected: $CHART_DIRECTORY"
       ;;
     "values")
       # The -t test checks if the file descriptor is connected to a terminal.
@@ -834,8 +809,9 @@ main(){
       ;;
     *)
       doc::help synopsis
-      echo::err  "Command $COMMAND is unknown"
+      echo::err "Command $COMMAND is unknown"
       exit 1
+      ;;
   esac
 
 }

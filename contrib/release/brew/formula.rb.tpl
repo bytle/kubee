@@ -59,7 +59,8 @@ class {{brewFormulaName}} < Formula
         if [ ${KUBEE_CHARTS_PATH:-} == "" ]; then
             KUBEE_CHARTS_PATH="#{libexec}/charts"
         else
-            KUBEE_CHARTS_PATH="#{libexec}/charts:$KUBEE_CHARTS_PATH"
+            # Actual chart path first
+            KUBEE_CHARTS_PATH="$KUBEE_CHARTS_PATH:#{libexec}/charts"
         fi
         export KUBEE_RESOURCES_DIR="#{libexec}"
         PROJECT_VERSION="{{projectVersion}}"
