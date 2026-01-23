@@ -45,11 +45,11 @@ There is no magic. All commands are:
 
 ### What is a Kubee Helmet hart?
 
-[What is a Kubee Helmet Chart](../general/kubee-helmet-chart.md)
+[What is a Kubee Helmet Chart](../helmet/helmet-chart.md)
 
 ### What is a Jsonnet Helmet Chart?
 
-[What is a Jsonnet Kubee Chart](../general/jsonnet-chart.md)
+[What is a Jsonnet Kubee Chart](../helmet/jsonnet-chart.md)
 
 ### What is the format of a Cluster Values file?
 

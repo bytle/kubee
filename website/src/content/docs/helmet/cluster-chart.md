@@ -4,8 +4,8 @@ title:  Cluster Kubee Chart
 
 
 
-A `cluster chart` is a [kubee chart](kubee-helmet-chart.md)
-that manages a [cluster](cluster.md)
+A `cluster chart` is a [kubee chart](../helmet/helmet-chart.md)
+that manages a [cluster](../cluster/cluster.md)
 
 ## Driver
 
@@ -19,7 +19,7 @@ This script may implement the following command:
 * `play`      : install a Kubernetes distribution in the cluster hosts
 * `reboot`    : reboot the cluster hosts (ie operating system) in order
 * `uninstall` : uninstall the Kubernetes distribution in the cluster hosts
-* `upgrade`   : [upgrade the Kubernetes distribution](k3s-upgrade.md) in the cluster hosts
+* `upgrade`   : [upgrade the Kubernetes distribution](../k3s/upgrade.md) in the cluster hosts
 
 
 ## Default Cluster Chart
@@ -30,7 +30,7 @@ The default cluster chart is the [k3s-ansible cluster chart](https://github.com/
 
 The cluster chart value is set in the `chart` property of the [kubee cluster chart](https://github.com/bytle/kubee/tree/main/charts/cluster)
 
-Example: in your [cluster values file](cluster-values.md)
+Example: in your [cluster values file](../cluster/cluster-values.md)
 ```yaml
 cluster:
   chart: 'k3s-ansible'

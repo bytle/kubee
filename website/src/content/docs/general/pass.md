@@ -1,11 +1,9 @@
 ---
-title:  Pass secret store
+title: Pass secret store
 ---
 
 
-
 [pass](https://www.passwordstore.org/) is a secret store.
-
 
 ## Installation
 
@@ -19,6 +17,6 @@ More package manager, see [pass download](https://www.passwordstore.org/#downloa
 
 ### Windows
 
-On Windows, `pass` does not support windows but [gopass](https://www.gopass.pw/) supports its interface.
+On Windows, the original `pass` does not support windows but [gopass](https://www.gopass.pw/) does..
 
 See [gopass installatoion](https://www.gopass.pw/#install)

@@ -1,13 +1,10 @@
 ---
-title:  Kube Easy - A One-Clik, Single VPS, Self-Hosted Kubernetes Platform
+title: kubee command
 ---
 
-
-
 ## About
+
 `kubee` is the main entry of the `kubee platform`
-
-
 
 ## Extras
 
@@ -25,7 +22,7 @@ Query and send alert to the Prometheus Alert Manager with [kubee-alertmanager](k
 
 ### Shell
 
-* [Kubee shell](kubee-app-shell.md) - get a shell from a busybox container or a pod
+[Kubee shell](kubee-app-shell.md) - get a shell from a busybox container or a pod
 
 ### Ephemere KubeConfig stored in pass
 
@@ -55,6 +52,7 @@ Generate an Ephemere Kubeconfig from pass with [kubeconfig-pass](../general/kube
 In all `app` scripts, you need to give an `app name` as argument.
 
 The scripts will try to find resources for an app:
+
 * via the `app.kubernetes.io/instance=$APP_NAME` label
 * via the `app.kubernetes.io/name=$APP_NAME` label
 * or via the `.envrc` of an app directory
@@ -65,19 +63,21 @@ because an operator may ship multiple CRD definitions.
 See: `app.kubernetes.io/part-of: argocd`
 
 Example: the Prometheus Operator
+
 * prometheus (Prometheus CRD)
 * alertmanager (AlertManager CRD)
 * pushgateway
 * node exporter
 
-
 ### What is Envrc App Definition?
 
 In this configuration:
-* All apps are in a subdirectory of the `KUBEE_APP_HOME` directory (given by the `$KUBEE_APP_HOME` environment variable).
-* The name of an app is the name of a subdirectory
-* Each app expects a `kubeconfig` file located at `~/.kube/config-<app name>` with the default context set with the same app namespace
 
+* All apps are in a subdirectory of the `KUBEE_APP_HOME` directory (given by the `$KUBEE_APP_HOME` environment
+  variable).
+* The name of an app is the name of a subdirectory
+* Each app expects a `kubeconfig` file located at `~/.kube/config-<app name>` with the default context set with the same
+  app namespace
 
 ## Kubectl Plugins
 
@@ -85,9 +85,9 @@ To make these utilities [Kubectl plugin](https://kubernetes.io/docs/tasks/extend
 you can rename them from `kubee-` to `kubectl-`
 
 They should then show up in:
+
 ```bash
 kubectl plugin list
 ```
-
 
 You can discover other plugins at [Krew](https://krew.sigs.k8s.io/plugins/)

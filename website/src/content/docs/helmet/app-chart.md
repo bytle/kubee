@@ -4,7 +4,7 @@ title:  Kubee App Chart
 
 
 
-An `app chart` is a [kubee chart](kubee-helmet-chart.md) that install/upgrade an application.
+An `app chart` is a [kubee chart](helmet-chart.md) that install/upgrade an application.
 
 ## Helm Wrapper
 
@@ -28,7 +28,7 @@ You:
 
 They are installed with `kubee helmet`.
 
-Once you have added or modified the app chart to your [cluster values](cluster-values.md) file, you
+Once you have added or modified the app chart to your [cluster values](../cluster/cluster-values.md) file, you
 can install or update it via the following command:
 ```bash
 kubee --cluster cluster-name helmet play chart-name

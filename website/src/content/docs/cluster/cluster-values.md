@@ -29,8 +29,8 @@ kubernetes_dashboard:
 
 ## Structure
 
-The Cluster values files has one top node for each [kubee helmet chart](kubee-helmet-chart.md)
-that contains the [helmet chart configuration](kubee-helmet-chart.md#values-file)
+The Cluster values files has one top node for each [kubee helmet chart](../helmet/helmet-chart.md)
+that contains the [helmet chart configuration](../helmet/helmet-chart.md#values-file)
 
 Each chart top node should at least have the `enabled` property set to `true`
 if the Chart should be installed.

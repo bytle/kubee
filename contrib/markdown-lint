@@ -7,7 +7,8 @@
 set -e  # Exit on any error
 
 # Loop through all subdirectories
-for childPath in docs/*; do
+# We avoid node modules
+for childPath in website/src/*; do
   if [ ! -d "$childPath" ]; then
       continue
   fi
@@ -32,3 +33,9 @@ markdown-link-check \
             --config contrib/markdown-lint-config.json \
             --quiet \
             charts/**/README.md
+
+echo "README Site"
+markdown-link-check \
+            --config contrib/markdown-lint-config.json \
+            --quiet \
+            website/README.md

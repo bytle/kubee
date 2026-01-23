@@ -1,11 +1,10 @@
 ---
-title:  K3s Upgrade
+title: How to upgrade K3s
 ---
-
 
 ## About
 
-This page shows you how to upgrade `k3s` on your cluster.
+This page shows you how to upgrade [k3s](index.md) on your cluster.
 
 ## Steps
 
@@ -14,9 +13,10 @@ This page shows you how to upgrade `k3s` on your cluster.
 #### Version
 
 Kubernetes versions are expressed as x.y.z, where
-  * x is the major version,
-  * y is the minor version,
-  * and z is the patch version.
+
+* x is the major version,
+* y is the minor version,
+* and z is the patch version.
 
 In Kubernetes versioning v1.32.2:
 
@@ -26,7 +26,8 @@ In Kubernetes versioning v1.32.2:
 
 #### Don't mess with the Skew Policy
 
-K3s follows the [Kubernetes version skew policy](https://kubernetes.io/releases/version-skew-policy/#supported-component-upgrade-order),
+K3s follows
+the [Kubernetes version skew policy](https://kubernetes.io/releases/version-skew-policy/#supported-component-upgrade-order),
 which requires that you not skip intermediate minor versions when upgrading K3s.
 The policy for all Kubernetes distributions is to take single steps between minor versions - no skipping minors.
 
@@ -35,6 +36,7 @@ Ensure that your plan does not skip intermediate minor versions when upgrading.
 https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/
 
 The "don't skip intermediate minor versions" rule means:
+
 * ❌ Don't go from 1.32.x → 1.34.x (skipping 1.33)
 * ✅ Do go from 1.32.x → 1.33.x → 1.34.x (one minor version at a time)
 
@@ -44,9 +46,10 @@ https://github.com/k3s-io/k3s/releases
 
 ### Set the version in your cluster file
 
-Set the version in your [cluster](cluster-values.md) file
+Set the version in your [cluster file](../cluster/cluster-values.md)
 
 Example:
+
 ```yaml
 k3s_ansible:
   # https://github.com/k3s-io/k3s/releases
@@ -56,21 +59,21 @@ k3s_ansible:
 
 ### Execute the cluster upgrade
 
-Execute the cluster upgrade with the default [cluster chart](cluster-chart.md)
+Execute the cluster upgrade with the default [cluster chart](../helmet/cluster-chart.md)
+
 ```bash
 kubee --cluster clusterName cluster upgrade
 # same as
 # kubee --cluster clusterName --cluster-chart k3s-ansible cluster upgrade
 ```
 
-
 ## Support
 
-### Downgrade not supported
+### Downgrade not supported, only rollback
 
-[Not supported](https://docs.k3s.io/upgrades/automated#downgrade-prevention)
-but you [can rollback](https://docs.k3s.io/upgrades/roll-back)
+`k3s` does [not support any downgrade](https://docs.k3s.io/upgrades/automated#downgrade-prevention),
+but you [can roll back](https://docs.k3s.io/upgrades/roll-back)
 
 If you cannot restore the database, you cannot roll back to a previous minor version.
 
-See [k3s-backup](k3s-backup.md)
+See [k3s-backup](backup.md)

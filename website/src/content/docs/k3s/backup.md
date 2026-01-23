@@ -1,12 +1,11 @@
 ---
-title:  K3-backup
+title: K3S backup
 ---
-
-
 
 ## Steps
 
 ### Backup
+
 * Always back up your token.
 * If you're using
   * etcd snapshots, take snapshots and back them up somewhere.
@@ -16,18 +15,19 @@ title:  K3-backup
 
 https://github.com/k3s-io/k3s/discussions/5886
 
-
 ### Restoration
 
-To roll back a K3s cluster when using a SQLite database, replace the `.db` file with the copy of the `.db` file you made while backing up your database.
+To roll back a K3s cluster when using a SQLite database, replace the `.db` file with the copy of the `.db` file you made
+while backing up your database.
 
 Restoring the `state.db` file works (as long as the `shm` and `wal` files are deleted before restore).
-See [k3s-datastore](k3s-datastore-sqlite.md)
+See [k3s-datastore](datastore-sqlite.md)
 
 ## Related Rollback
 
 You can roll back the K3s Kubernetes version after an upgrade, using a combination of
-  * K3s binary downgrade
-  * and datastore restoration.
+
+* K3s binary downgrade
+* and datastore restoration.
 
 [rollback](https://docs.k3s.io/upgrades/roll-back)

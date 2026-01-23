@@ -4,7 +4,7 @@ title:  Kubee Kustomize Project Support
 
 
 
-A [Kubee Helmet chart](kubee-helmet-chart.md) supports kustomization project.
+A [Kubee Helmet chart](helmet-chart.md) supports kustomization project.
 
 ## Project Structure
 
@@ -17,6 +17,7 @@ Your kustomization file:
 ## Example of Kustomization File
 
 ```yaml
+#file: noinspection KubernetesUnknownValues
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: ${KUBEE_NAMESPACE}

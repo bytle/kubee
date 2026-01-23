@@ -1,5 +1,5 @@
 ---
-title:  K3s Datastore
+title: K3s SQLite Datastore
 ---
 
 
@@ -43,7 +43,7 @@ sqlite3_analyzer /var/lib/rancher/k3s/server/db/state.db
 
 #### SQLite Report analytics on kine
 
-Kine is an etcdshim that translates etcd API to:
+Kine is an etcd shim that translates the etcd API to:
 
 * SQLite
 * Postgres

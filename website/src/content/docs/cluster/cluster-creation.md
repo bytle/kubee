@@ -76,7 +76,7 @@ with `openssl rand -base64 64 | tr -d '\n'
 export KUBEE_INFRA_K3S_TOKEN='bib7F0biIxpUUuOJJpjs9EgzqViHjAVna3MyxGbTq++gjXf6tm7y5c7' # don't change it
 ```
 
-  * With a password manager such as [pass or gopass](pass.md)
+  * With a password manager such as [pass or gopass](../general/pass.md)
 ```bash
 # once to store your token
 # pass insert kubee/k3s/token
@@ -135,7 +135,7 @@ Example `.envrc` file:
 export KUBEE_INFRA_CONNECTION_PRIVATE_KEY_FILE=~/.ssh/server_01_rsa
 ```
 
-* From a secret store such as [pass](https://www.passwordstore.org/) or [gopass](https://www.gopass.pw/)
+* From a secret store such as [pass](../general/pass.md)
 
 ```bash
 export KUBEE_INFRA_CONNECTION_PRIVATE_KEY
@@ -179,7 +179,7 @@ If the app is:
 
 ### Install applications in the Kubernetes app
 
-With `kubee helmet`, you can install apps with any [kubee charts](kubee-helmet-chart.md)
+With [kubee helmet](../command/kubee-helmet.md), you can install apps with any [kubee charts](../helmet/helmet-chart.md)
 
 Example:
 

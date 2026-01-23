@@ -1,37 +1,38 @@
 ---
-title: Kubee - A One-Clik, Self-Hosted Kubernetes Platform
-description: Manage a cluster
+title: Kubernetes, the Easy way. Single VPS hosting and beyond.
+description: Kubee, Kubernetes, the Easy way. Single VPS hosting and beyond.
 template: splash # Remove or comment out this line to display the site sidebar on this page.
 hero:
-  tagline: Kubernetes, the Easy way. Single VPS hosting and beyond.
+  tagline: A One-Clik, Self-Hosted Kubernetes Platform
   image:
     file: ../../assets/houston.webp
   actions:
-    - text: Create your cluster
-      link: /cluster-creation
+    - text: Getting Started
+      link: /getting-started
       icon: right-arrow
       variant: minimal
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## Next steps
 
 <CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
+	<Card title="Just an Helm Wrapper" icon="pencil">
+		All charts are Helm compatible. 
+    The kubee chart manager, [helmet](helmet/index.md) is just an Helm Wrapper
+    with a post-processing plugin that adds support for jsonnet and kustomize.
 	</Card>
-	<Card title="Change page layout" icon="document">
-		Delete `template: splash` in `src/content/docs/index.mdx` to display a
-		sidebar on this page.
+	<Card title="Single VPS Optimized" icon="document">
+		Kubee was build with the constraint resource of a Single VPS.
+    The default kubernetes distribution is [k3s](k3s/index.md) and
+    all default chart values are set to minimize memory and cpu consumption.
+    A whole Prometheus installation takes a maximum of 400Mo memory.
 	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
+	<Card title="Just Bash, no Lock in" icon="add-document">
+		Kubee is implemented with bash scripts. 
+    You can fork it, modify it and make it your own.
 	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
-	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
+	<Card title="Single Cluster Value file " icon="setting">
+    The whole cluster configuration is done in a [single values file](cluster/cluster-values.md).
 	</Card>
 </CardGrid>

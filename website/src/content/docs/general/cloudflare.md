@@ -1,11 +1,11 @@
 ---
-title:  Cloudflare
+title: Cloudflare
 ---
 
 
 Cloudflare is fully supported as DNS provider.
 
-It can be configured by the following [Kubee Chart](kubee-helmet-chart.md)
+It can be configured by the following [Kubee Chart](../helmet/helmet-chart.md)
 
 * `Cert Manager`
 * `External DNS`
@@ -17,7 +17,7 @@ Get the API key [Ref](https://cert-manager.io/docs/configuration/acme/dns01/clou
 * Go to `Cloudflare > User Profile > API Tokens > API Tokens`.
 * Create a token with
 * Permissions:
-    * `Zone - DNS - Edit`
-    * `Zone - Zone - Read`
-    * Zone Resources :
-        * `Include - All Zones`
+  * `Zone - DNS - Edit`
+  * `Zone - Zone - Read`
+  * Zone Resources :
+    * `Include - All Zones`

@@ -48,17 +48,12 @@ tasks:
         # We don't use find exec because it will not stop at first error
         # xargs exit 255 is mandatory to stop at first error
         find "{{.TASK_DIR}}/charts" -maxdepth 2 -mindepth 1 -type f  -name "Chart.yaml" | xargs -I {} bash -c 'cd "$(dirname "{}")" && echo "Executing on $PWD" && task schema || exit 255'
-  # Generate the bin documentation
-  bin-docs:
-    cmds:
-      - |
-        bashlib-docgen --output-dir site/src/pages/command --md-dir docs/bin bin
   # Generate the current Chart doc
   helm-docs:
     cmds:
       - |
         if [ "{{.USER_WORKING_DIR}}" == "{{.TASK_DIR}}" ]; then
-          echo "We don't generate for all charts for now"
+          echo "To generate for all docs, run helm-docs-all"
           exit 1
         fi
         helm-docs --chart-search-root={{.USER_WORKING_DIR}} --template-files={{.TASK_DIR}}/.helm-docs/helm-docs-extra-templates.gohtml --template-files=README.md.gotmpl
@@ -73,13 +68,15 @@ tasks:
         echo "# Ignore charts dependencies directories" >> "$HELM_DOCS_IGNORE"
         echo "# Should be at the root of repo see issue: https://github.com/norwoodj/helm-docs/issues/206" >> "$HELM_DOCS_IGNORE"
         find "charts" -maxdepth 2 -mindepth 1 -type d  -name "charts" >> "$HELM_DOCS_IGNORE"
-
+  helm-docs-all:
+    cmds:
+      - |
+        find "{{.TASK_DIR}}/charts" -maxdepth 2 -mindepth 1 -type f  -name "Chart.yaml"  | xargs -I {} bash -c 'cd "$(dirname "{}")" && task helm-docs || exit 255'
   # Generate all README helm-docs for all charts
   # and the lint
   docs-all:
     cmds:
-      - |
-        find "{{.TASK_DIR}}/charts" -maxdepth 2 -mindepth 1 -type f  -name "Chart.yaml"  | xargs -I {} bash -c 'cd "$(dirname "{}")" && task helm-docs || exit 255'
+      - task helm-docs-all
       - task readme
       - task docs-lint
 

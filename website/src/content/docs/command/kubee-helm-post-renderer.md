@@ -26,4 +26,4 @@ that adds support for:
 
 ## JSONNET
 
-See [kubee jsonnet-project](../general/jsonnet-project.md)
+See [kubee jsonnet-project](../helmet/jsonnet-project.md)
