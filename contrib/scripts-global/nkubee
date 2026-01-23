@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# next version kubee wrapper
+# so that it does not clash with the kubee stable version
+# installed by brew
+
+set -TCEeuo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")" && pwd)"
+
+"$SCRIPT_DIR/../../bin/kubee" "$@"
