@@ -1,0 +1,166 @@
+#!/usr/bin/env bash
+
+# Fail if any errors
+set -Eeuo pipefail
+
+NC='\033[0m'     # No Color
+RED='\033[0;31m' # Red
+
+function synopsis() {
+  cat << EOF
+
+  Release $PROJECT_NAME:
+
+      $(basename "$0") command [options]
+
+  Command:
+    * build : build the docker image
+    * run   : start the docker image
+
+  Options:
+    * --debug                 : set the level to debug
+
+EOF
+}
+
+function deploy() {
+  echo "Patch Deployment"
+  KUBE_ARGOCD_DIR="$HOME/code/kube-argocd"
+  cd "$KUBE_ARGOCD_DIR"
+  APP_MANIFEST_PATH=charts/net-bytle/templates/net-bytle-deployment.yml
+  # Patch with the last commit the app deployment
+  POINTER="# IMAGE_TO_UPDATE"
+  TAG_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$TAG")
+  # ie TAG_DIGEST=ghcr.io/gerardnico/bytle@sha256:c327aabb0a23d19b8503c55e994343cbccddb83ff7eb0ce22d071697760da959
+  DIGEST="${TAG_DIGEST#*sha256:}"
+  SED_EXPRESSION="s/image: \".*\" $POINTER/image: \"ghcr.io\/$ORGANIZATION_NAME\/$PROJECT_NAME:$RELEASE_VERSION@sha256:$DIGEST\" $POINTER/"
+  sed -i "$SED_EXPRESSION" "$APP_MANIFEST_PATH"
+  # Do we have changes?
+  CHANGES_COUNT=$(git diff --name-only | wc -l)
+  if [ "$CHANGES_COUNT" == '0' ]; then
+    echo "No changes (Should not happen on push)"
+    exit 1
+  fi
+  echo "Deployment file has changed, pushing it"
+  #git config user.name "$GITHUB_ACTOR"
+  #git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+  git add "$APP_MANIFEST_PATH"
+  git commit -m "Updated $ORGANIZATION_NAME/$PROJECT_NAME image in $APP_MANIFEST_PATH"
+  git push origin main
+  echo "Done"
+}
+
+function run(){
+  echo "Start daemon: "
+  echo " "
+  COMMAND="docker run -d --name $CONTAINER --rm -p $PORT:80 $TAG"
+  eval "$COMMAND"
+  echo "  $COMMAND"
+  echo " "
+  echo "  $CONTAINER should be available at: http://localhost:$PORT"
+  echo ""
+  echo "Stop it with: docker stop $CONTAINER"
+}
+
+function build() {
+  echo "Yarn build"
+  npm run build
+  echo "Yarn build done"
+  echo "Docker build"
+  docker build \
+    --tag "$TAG" \
+    --build-arg ORGANIZATION_NAME="$ORGANIZATION_NAME" \
+    --build-arg PROJECT_NAME="$PROJECT_NAME" \
+    .
+  echo "Docker build done"
+}
+
+function push() {
+  DOCKER_USER=$(pass "$ORGANIZATION_NAME"/github/docker-user)
+  pass "$ORGANIZATION_NAME"/github/release-token | docker login ghcr.io -u "$DOCKER_USER" --password-stdin
+  echo "Docker Push to registry"
+  COMMAND="docker push $TAG"
+  eval "$COMMAND"
+  echo "Docker Container Pushed"
+}
+
+# We should be in the website directory
+cd "$PROJECT_ROOT/website"
+
+COMMAND=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --debug)
+      LEVEL=debug
+      ;;
+    -h | --help)
+      synopsis
+      exit
+      ;;
+    build)
+      COMMAND="build"
+      ;;
+    push)
+      COMMAND="push"
+      ;;
+    run)
+      COMMAND="run"
+      ;;
+    stop)
+      COMMAND="stop"
+      ;;
+    deploy)
+      COMMAND="deploy"
+      ;;
+    full)
+      COMMAND="full"
+      ;;
+    *)
+      BUMP_TYPE=${1}
+      shift
+      break
+      ;;
+  esac
+  shift
+done
+
+if [ "$COMMAND" == "" ]; then
+  echo -e "${RED}A command is mandatory"
+  synopsis
+  exit 1
+fi
+
+# We release by hash
+export RELEASE_VERSION="early-access"
+export TAG="ghcr.io/$ORGANIZATION_NAME/$PROJECT_NAME-website:$RELEASE_VERSION"
+export PORT=3010
+export CONTAINER=$PROJECT_NAME
+case "$COMMAND" in
+  build)
+    build
+    ;;
+  run)
+    run
+    ;;
+  stop)
+    echo "Docker Stop container"
+    COMMAND="docker stop $CONTAINER"
+    eval "$COMMAND"
+    echo "Docker Container Stopped"
+    ;;
+  push)
+    push
+    ;;
+  deploy)
+    deploy
+    ;;
+  full)
+    build
+    push
+    deploy
+    ;;
+  *)
+    echo "Unknown command"
+    exit 1
+    ;;
+esac

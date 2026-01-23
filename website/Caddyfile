@@ -1,0 +1,8 @@
+:80 {
+    root * /usr/share/caddy
+    file_server {
+        # trailingSlash: 'never' compatibility
+        # by default, caddy redirect
+        disable_canonical_uris
+    }
+}
