@@ -102,3 +102,32 @@ tasks:
     cmds:
       - |
         {{.TASKFILE_DIR}}/contrib/markdown-lint
+
+  # Batch Charts Dependency directory symlink update
+  # Used at release time, if the repo is fresh or was moved
+  # We delete the charts directory first to be sure
+  # As the force flag may be recursive, we don't use it
+  chart_dependency_symlink:
+    cmds:
+      - |
+        find "{{.TASK_DIR}}/charts" -mindepth 1 -maxdepth 1 -type d -print0 \
+          | sort -z \
+          | xargs -0 -I{} bash -c ' 
+          CHART_NAME=$(basename $1)
+          echo Deleting charts for $CHART_NAME
+          rm -rf $1/charts
+          echo Done
+        ' _ {} \;
+        find "{{.TASK_DIR}}/charts" -mindepth 1 -maxdepth 1 -type d -print0 \
+          | sort -z \
+          | xargs -0 -I{} bash -c '
+          CHART_NAME=$(basename $1)
+          if [[ $CHART_NAME =~ ^(k3s-ansible|kyverno)$ '' ]];
+            # k3s-ansible: not a normal chart, a cluster chart
+            # kyverno is not finish
+            exit
+          fi
+          echo Creating Symlink Charts Dependencies for $CHART_NAME
+          {{.TASK_DIR}}/bin/kubee helmet update-dependencies $CHART_NAME
+          echo Symlink $CHART_NAME Done
+        ' _ {} \;

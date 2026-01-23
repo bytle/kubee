@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+
+set -TCEeuo pipefail
+
+function synopsis() {
+  cat << EOF
+
+  Release $PROJECT_NAME:
+
+      $(basename "$0") [--assemble-only|-a] [patch|minor|major]
+
+    * -a | --assemble-only : will not release (create the archive only)
+    * -p | --prepare-only  : will not release (create the archive and the packagers manifest only)
+    * patch|minor|major|snapshot    : is the type of bump for the semver version (default to snapshot)
+
+EOF
+}
+
+BUMP_SNAPSHOT_TYPE="snapshot"
+BUMP_TYPE="$BUMP_SNAPSHOT_TYPE"
+GOAL="release"
+ASSEMBLE_GOAL="assemble"
+PREPARE_GOAL="prepare"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -a | --assemble-only)
+      GOAL="$ASSEMBLE_GOAL"
+      ;;
+    -p | --prepare-only)
+      GOAL="$PREPARE_GOAL"
+      ;;
+    -h | --help)
+      synopsis
+      exit
+      ;;
+    *)
+      BUMP_TYPE=${1}
+      shift
+      break
+      ;;
+  esac
+  shift
+done
+echo "Release with bump type: $BUMP_TYPE"
+
+if [ "$BUMP_TYPE" != "$BUMP_SNAPSHOT_TYPE" ]; then
+  # Get the next version
+  export GIT_CLIFF__BUMP__INITIAL_TAG=v0.1.0 # by default it's 0.1.0
+  release_version=$(git cliff --unreleased --bump "$BUMP_TYPE" --context --tag-pattern "v[0-9]+\\.[0-9]+\\.[0-9]+" | jq -r '.[0].version' | tr -d "v")
+else
+  # come from Jreleaser
+  release_version='1.0.0-SNAPSHOT'
+fi
+
+export BUILD_DIR="out"
+
+#echo "Preparing"
+#if ! git-prepare; then
+#  echo "Error found while preparing the release commit"
+#  exit 1
+#fi
+
+# Jreleaser
+export JRELEASER_PROJECT_VERSION="$release_version"
+# Clean otherwise the archive is not good
+JRELEASER_BUILD_DIR="$PROJECT_ROOT/$BUILD_DIR/jreleaser"
+rm -rf "$JRELEASER_BUILD_DIR"
+
+# Conf file so that we can call release from every sub directory of the project
+JRELEASER_CONF=$PROJECT_ROOT/jreleaser.yml
+
+# Dependency directory update
+# Note that the charts dependency directory should exist
+# If not, the below command should be fired
+# task chart_dependency_symlink
+
+# Create the archive
+jreleaser assemble --config-file "$JRELEASER_CONF"
+
+if [ "$GOAL" == "$ASSEMBLE_GOAL" ]; then
+  echo "Assemble only version $release_version done"
+  exit
+fi
+
+if [ "$GOAL" == "$PREPARE_GOAL" ]; then
+  jreleaser prepare --config-file "$JRELEASER_CONF"
+  echo "Prepare only version $release_version done"
+  exit
+fi
+
+# Release
+jreleaser full-release --config-file "$JRELEASER_CONF"
+echo "Version release of $release_version done"
+
+# to resolve ! [rejected] v0.x.x -> v0.x.x  (would clobber existing tag)
+git fetch --tags --force
+
+# Website ???

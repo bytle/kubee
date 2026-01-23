@@ -423,6 +423,7 @@ update-dependencies(){
 
 
   # The charts dependency directory
+  local CHART_CHARTS_DIRECTORY="$CHART_DIRECTORY/charts";
   if [ "${OPTION_FORCE:-}" != "" ]; then
     echo::debug "Force called, deleting the charts directory"
     echo::eval "rm -rf $CHART_CHARTS_DIRECTORY"

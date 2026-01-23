@@ -1,0 +1,113 @@
+# yaml-language-server: $schema=https://jreleaser.org/schema/jreleaser-schema-1.21.0.json
+# https://jreleaser.org/guide/latest/reference/project.html
+project:
+  name: kubee
+  # description should be 1 online otherwise we get a end of line at the end
+  description: Kubernetes, the Easy way. Single VPS hosting and beyond.
+  authors:
+    - Nicolas GERARD
+  copyright: '2024 bytle.net'
+  license: Apache-2.0
+  inceptionYear: '2024'
+  vendor: bytle.net
+  tags:
+    - k3s
+    - kubernetes
+    - helm
+    - jsonnet
+    - kustomize
+  stereotype: NONE
+  links:
+    homepage: https://kubee.bytle.net
+    documentation: https://kubee.bytle.net
+    bugTracker: https://github.com/bytle/kubee
+    help: https://github.com/bytle/kubee
+  languages:
+    # It's not a java project but
+    # as JReleaser does not support an archive with a bunch of script
+    # we took JAVA_ARCHIVE that requires Java coordinates
+    java:
+      groupId: net.bytle
+      artifactId: kubee
+      version: "11"
+
+
+assemble:
+  # Create an archives
+  # https://jreleaser.org/guide/latest/reference/assemble/archive.html
+  archive:
+    kubee:
+      active: ALWAYS
+      formats:
+        - ZIP
+        # TAR_GZ error
+        # file name 'kubee-1.0.0-SNAPSHOT/charts/alertmanager/jsonnet/vendor/github.com/grafana/grafonnet/gen/grafonnet-latest/jsonnetfile.json' is too long ( > 100 bytes)
+        #- TAR_GZ
+      # JReleaser does not have the notion of an archive with a bunch of script
+      # We use JAVA_BINARY because we don't need to specify the platform
+      # Otherwise the archiveName beccome giture-0.1.0-linux-x86_64.tar.gz
+      # and brew template is no more the same ....
+      # https://jreleaser.org/guide/latest/concepts/distributions/java-binary.html
+      distributionType: JAVA_BINARY
+      artifacts:
+        - path: LICENSE
+        - path: README.md
+      fileSets:
+        - input: bin # relative path
+          output: bin # path in the archive
+          failOnMissingInput: true
+#        - input: "{{baseOutputDirectory}}/man1"
+#          output: man1 # path in the archive
+#          includes:
+#            - '*.1' # glob (not regexp)
+        - input: ../../bash-lib/lib
+          output: lib # path in the archive
+        - input: charts
+          output: charts # path in the archive
+
+# Create a GitHub release
+# https://jreleaser.org/guide/latest/reference/release/github.html
+release:
+  github:
+    owner: bytle
+    releaseName: "Release {{projectEffectiveVersion}}"
+    # https://jreleaser.org/guide/latest/reference/release/changelog.html
+    changelog:
+      formatted: ALWAYS
+      format: '- {{commitShortHash}} {{commitTitle}}'
+      preset: 'conventional-commits'
+      content: |
+        # Changelog Version {{projectEffectiveVersion}}
+
+        {{changelogChanges}}
+
+# Create signatures files for the distributions files and the checksum files
+signing:
+  active: ALWAYS
+  mode: COMMAND
+
+distributions:
+  kubee:
+    # Artifacts are defined in the assembly
+    # Run it with
+    # JRELEASER_PROJECT_VERSION="0.1.0" jreleaser prepare --debug -p=brew
+    # https://jreleaser.org/guide/latest/reference/packagers/homebrew.html
+    brew:
+      active: ALWAYS
+      formulaName: 'kubee'
+      templateDirectory: contrib/release/brew
+      repository:
+        # multi product one repo, we add the project
+        tagName: '{{projectName}}-{{tagName}}'
+      # Dependency mostly due to the hosting backup command (see its documentation)
+      # No schema validation because it's setup to an array, but it's a map asked
+      # noinspection YAMLSchemaValidation
+      dependencies:
+        coreutils: 'null'
+        git: 'null'
+        openssh: 'null'
+        curl: 'null'
+      extraProperties:
+        # Don't add java as dependency
+        # https://jreleaser.org/guide/latest/reference/packagers/homebrew.html#_jdk_dependency
+        skipJava: "true"

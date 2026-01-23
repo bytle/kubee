@@ -6,6 +6,8 @@
 
 set -e  # Exit on any error
 
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")" && pwd)"
+
 # Loop through all subdirectories
 # We avoid node modules
 for childPath in website/src/*; do
@@ -17,25 +19,25 @@ for childPath in website/src/*; do
   fi
   echo "$childPath"
   markdown-link-check \
-            --config contrib/markdown-lint-config.json \
+            --config "$SCRIPT_DIR/markdown-lint-config.json" \
             --quiet \
             "$childPath"
 done
 
 echo "README main"
 markdown-link-check \
-            --config contrib/markdown-lint-config.json \
+            --config "$SCRIPT_DIR/markdown-lint-config.json" \
             --quiet \
             "README.md"
 
 echo "README charts"
 markdown-link-check \
-            --config contrib/markdown-lint-config.json \
+            --config "$SCRIPT_DIR/markdown-lint-config.json" \
             --quiet \
             charts/**/README.md
 
 echo "README Site"
 markdown-link-check \
-            --config contrib/markdown-lint-config.json \
+            --config "$SCRIPT_DIR/markdown-lint-config.json" \
             --quiet \
             website/README.md
