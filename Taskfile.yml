@@ -101,7 +101,7 @@ tasks:
   docs-lint:
     cmds:
       - |
-        {{.TASKFILE_DIR}}/contrib/markdown-lint
+        {{.TASKFILE_DIR}}/contrib/scripts/markdown-lint
 
   # Batch Charts Dependency directory symlink update
   # Used at release time, if the repo is fresh or was moved
