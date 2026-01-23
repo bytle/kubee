@@ -67,10 +67,17 @@ fi
 
 # Kubee Home (Ie installation path)
 # Homebrew uses link so we need realpath
+# Due to symlink, it may be not the home but /home/linuxbrew/.linuxbrew/
 export KUBEE_HOME
 KUBEE_HOME="$(dirname "$(realpath "$SCRIPT_DIR")")"
 export KUBEE_BIN
 KUBEE_BIN="$KUBEE_HOME/bin"
+
+# KUBEE_RESOURCES_DIR are where resources such as lib and charts are stored
+# in Brew, it's libexec: /home/linuxbrew/.linuxbrew/Cellar/kubee-snapshot/0.1.0-SNAPSHOT/libexec
+if [ "${KUBEE_RESOURCES_DIR:-}" == "" ]; then
+  KUBEE_RESOURCES_DIR=${KUBEE_HOME}
+fi
 
 # Connection variables
 export KUBEE_CONNECTION_NAMESPACE=${KUBEE_CONNECTION_NAMESPACE:-"default"}

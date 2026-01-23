@@ -9,7 +9,7 @@ synopsis(){
   CLI_NAME=$(basename "$(doc::get_cli_command_words)" | tr "-" " ")
   cat << EOF
 \`\`\`bash
-$CLI_NAME command options chartName
+kubee helmet command options chartName
 \`\`\`
 
 where:

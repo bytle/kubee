@@ -18,7 +18,6 @@ source "bashlib-path.sh"
 # shellcheck source=./bashlib-template.sh
 source "bashlib-template.sh"
 
-
 # @description
 #     Return the app name and namespace from a string
 #     A qualified app name is made of one optional namespace and a name separated by a slash
@@ -28,7 +27,7 @@ source "bashlib-template.sh"
 #    read APP_NAMESPACE KUBEE_APP_NAME <<< "$(kube::get_qualified_app_name "$KUBEE_APP_NAME")"
 #
 # @stdout The app label ie `app.kubernetes.io/name=<app name>`
-kube::get_qualified_app_name(){
+kube::get_qualified_app_name() {
   KUBEE_APP_NAME=$1
   IFS="/" read -ra NAMES <<< "$KUBEE_APP_NAME"
   case "${#NAMES[@]}" in
@@ -46,6 +45,7 @@ kube::get_qualified_app_name(){
       echo::err "  * traefik"
       echo::err "  * prometheus/alertmanager"
       return 1
+      ;;
   esac
 }
 
@@ -59,18 +59,17 @@ kube::get_qualified_app_name(){
 #    APP_LABEL="$(kubee::get_app_label "$KUBEE_APP_NAME")"
 #
 # @stdout The app label ie `app.kubernetes.io/name=<app name>`
-kubee::get_app_label(){
+kubee::get_app_label() {
   echo "app.kubernetes.io/name=$1"
 }
 
-kubee::get_instance_label(){
+kubee::get_instance_label() {
   echo "app.kubernetes.io/instance=$1"
 }
 
-kubee::get_component_label(){
+kubee::get_component_label() {
   echo "app.kubernetes.io/component=$1"
 }
-
 
 # @description
 #     Function to search for resources across all namespaces by app name
@@ -94,23 +93,22 @@ kube::get_resources_by_app_name() {
   local NO_HEADERS="--no-headers"
 
   # Parsing the args
-  while [[ $# -gt 0 ]]
-  do
-     case "$1" in
-       "--type")
-         shift
-         RESOURCE_TYPE=$1
-         shift
-       ;;
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      "--type")
+        shift
+        RESOURCE_TYPE=$1
+        shift
+        ;;
       "--custom-columns")
-         shift
-         CUSTOM_COLUMNS=$1
-         shift
-      ;;
+        shift
+        CUSTOM_COLUMNS=$1
+        shift
+        ;;
       "--headers")
         NO_HEADERS=""
         shift
-      ;;
+        ;;
       *)
         if [ "$KUBEE_APP_NAME" == "" ]; then
           KUBEE_APP_NAME=$1
@@ -124,6 +122,7 @@ kube::get_resources_by_app_name() {
         fi
         echo::err "Too much arguments. The argument ($1) was unexpected"
         return 1
+        ;;
     esac
   done
 
@@ -139,26 +138,29 @@ kube::get_resources_by_app_name() {
   IFS="/" read -ra KUBEE_APP_NAMES <<< "$KUBEE_APP_NAME"
   local APP_LABELS=()
   case "${#KUBEE_APP_NAMES[@]}" in
-      "1")
-        # App Label
-        APP_LABELS+=("$(kubee::get_instance_label "$KUBEE_APP_NAME")")
+    "1")
+      # App Label
+      APP_LABELS+=("$(kubee::get_instance_label "$KUBEE_APP_NAME")")
       ;;
-      "2")
-        APP_LABELS+=("$(kubee::get_instance_label "${KUBEE_APP_NAMES[0]}")")
-        APP_LABELS+=("$(kubee::get_component_label "${KUBEE_APP_NAMES[1]}")")
-        ;;
-      *)
-        echo::err "A kubee app name has one or 2 parts ($KUBEE_APP_NAME)"
-        return 1
+    "2")
+      APP_LABELS+=("$(kubee::get_instance_label "${KUBEE_APP_NAMES[0]}")")
+      APP_LABELS+=("$(kubee::get_component_label "${KUBEE_APP_NAMES[1]}")")
+      ;;
+    *)
+      echo::err "A kubee app name has one or 2 parts ($KUBEE_APP_NAME)"
+      return 1
+      ;;
   esac
-
 
   #
   # Customs columns is a Json path wrapper.
   # Example:
   #     COMMAND="kubectl get $RESOURCE_TYPE --all-namespaces -l $APP_LABEL -o jsonpath='{range .items[*]}{.metadata.name}{\" \"}{.metadata.namespace}{\"\n\"}{end}' 2>/dev/null"
   #
-  COMMAND="kubectl get $RESOURCE_TYPE --all-namespaces -l $(IFS=","; echo "${APP_LABELS[*]}") -o custom-columns='$CUSTOM_COLUMNS' $NO_HEADERS 2> ${COMMAND_STDOUT_FD:-"/dev/null"}"
+  COMMAND="kubectl get $RESOURCE_TYPE --all-namespaces -l $(
+    IFS=","
+    echo "${APP_LABELS[*]}"
+  ) -o custom-columns='$CUSTOM_COLUMNS' $NO_HEADERS 2> ${COMMAND_STDOUT_FD:-"/dev/null"}"
   echo::eval "$COMMAND"
 
 }
@@ -180,59 +182,53 @@ kube::get_resources_by_app_name() {
 #
 # @stdout The resource name and namespace separated by a space or an empty string
 # @exitcode 1 - if too many resource was found
-kubee::get_resource_by_app_name(){
+kubee::get_resource_by_app_name() {
   RESOURCES=$(kube::get_resources_by_app_name "$@")
-  RESOURCE_COUNT=$(echo "$RESOURCES" | sed '/^\s*$/d' | wc -l )
+  RESOURCE_COUNT=$(echo "$RESOURCES" | sed '/^\s*$/d' | wc -l)
   if [ "$RESOURCE_COUNT" -gt 1 ]; then
-      echo "Error: Multiple resource found with the label app.kubernetes.io/name=$KUBEE_APP_NAME:"
-      echo "$RESOURCES"
-      exit 1
-  fi;
+    echo "Error: Multiple resource found with the label app.kubernetes.io/name=$KUBEE_APP_NAME:"
+    echo "$RESOURCES"
+    exit 1
+  fi
   echo "$RESOURCES"
 }
-
 
 # @description
 #     Return a json path to be used in a `-o jsonpath=x` kubectl option
 # @arg $1 string The Json expressions (Default to: `.metadata.name .metadata.namespace`)
-kube::get_json_path(){
+kube::get_json_path() {
   JSON_DATA_PATH_EXPRESSIONS=${1:-'.metadata.name .metadata.namespace'}
   JSON_PATH='{range .items[*]}'
   for DATA_EXPRESSION in $JSON_DATA_PATH_EXPRESSIONS; do
     # shellcheck disable=SC2089
     JSON_PATH="$JSON_PATH$DATA_EXPRESSION{\" \"}"
-  done;
+  done
   JSON_PATH="$JSON_PATH{\"\n\"}{end}"
   echo "$JSON_PATH"
 }
 
-
-
-
 # @description
 #     test the connection to the cluster
 # @exitcode 1 - if the connection did not succeed
-kube::test_connection(){
+kube::test_connection() {
 
   if OUTPUT=$(kubectl cluster-info); then
     echo::info "Test Connection succeeded"
-    return 0;
+    return 0
   fi
   echo::err "No connection could be made with the cluster"
 
-
   if [ "${KUBECONFIG:-}" == "" ]; then
-        echo::err "Note: No KUBECONFIG env found"
+    echo::err "Note: No KUBECONFIG env found"
   else
-      if [ ! -f "$KUBECONFIG" ]; then
-        echo::err "The KUBECONFIG env file ($KUBECONFIG) does not exist"
-      else
-        echo::info "The file ($KUBECONFIG) may have bad cluster info"
-        echo::err "Note: The config is:"
-        kubectl config view
-      fi
+    if [ ! -f "$KUBECONFIG" ]; then
+      echo::err "The KUBECONFIG env file ($KUBECONFIG) does not exist"
+    else
+      echo::info "The file ($KUBECONFIG) may have bad cluster info"
+      echo::err "Note: The config is:"
+      kubectl config view
+    fi
   fi
-
 
   echo::err "We got the following output from the connection"
   echo::err "$OUTPUT"
@@ -243,39 +239,40 @@ kube::test_connection(){
 # @description
 #     Return the directory of a cluster
 # @arg $1 string The package name
-kubee::get_cluster_directory(){
+kubee::get_cluster_directory() {
 
-    local CLUSTER_NAME="$1"
-    # All packages directories in an array
-    local KUBEE_CLUSTER_DIRS=()
-    IFS=":" read -ra KUBEE_CLUSTER_DIRS <<< "${KUBEE_CLUSTERS_PATH:-}"
-    # this works for executed script or sourced script
-    local KUBEE_RESOURCE_CLUSTERS_DIR
-    KUBEE_RESOURCE_CLUSTERS_DIR=$(realpath "$KUBEE_HOME/examples/clusters")
-    local KUBEE_CLUSTER_DIRS+=("$KUBEE_RESOURCE_CLUSTERS_DIR")
-    for KUBEE_CLUSTER_DIR in "${KUBEE_CLUSTER_DIRS[@]}"; do
-        if [ ! -d "$KUBEE_CLUSTER_DIR" ]; then
-          echo::warn "The path ($KUBEE_CLUSTER_DIR) set in KUBEE_CLUSTERS_PATH does not exist or is not a directory"
-          continue
-        fi
-        local CLUSTER_DIR="$KUBEE_CLUSTER_DIR/${CLUSTER_NAME}"
-        if [ -d "$CLUSTER_DIR" ]; then
-          echo "$CLUSTER_DIR"
-          return
-        fi
-    done
-    echo::err "No cluster directory found with the name ($CLUSTER_NAME) in"
-    echo::err "  * the cluster built-in directory (${KUBEE_RESOURCE_CLUSTERS_DIR}) "
-    echo::err "  * or the paths of the KUBEE_CLUSTERS_PATH variable (${KUBEE_CLUSTERS_PATH:-'not set'})"
-    return 1
-
+  local CLUSTER_NAME="$1"
+  # All packages directories in an array
+  local KUBEE_CLUSTER_DIRS=()
+  IFS=":" read -ra KUBEE_CLUSTER_DIRS <<< "${KUBEE_CLUSTERS_PATH:-}"
+  # this works for executed script or sourced script
+  local KUBEE_RESOURCE_CLUSTERS_DIR=""
+  if ! KUBEE_RESOURCE_CLUSTERS_DIR=$(realpath "$KUBEE_RESOURCES_DIR/examples/clusters" 2> /dev/null); then
+    echo "Warning: the example clusters were not found at $KUBEE_RESOURCES_DIR/examples/clusters"
+  fi
+  local KUBEE_CLUSTER_DIRS+=("$KUBEE_RESOURCE_CLUSTERS_DIR")
+  for KUBEE_CLUSTER_DIR in "${KUBEE_CLUSTER_DIRS[@]}"; do
+    if [ ! -d "$KUBEE_CLUSTER_DIR" ]; then
+      echo::warn "The path ($KUBEE_CLUSTER_DIR) set in KUBEE_CLUSTERS_PATH does not exist or is not a directory"
+      continue
+    fi
+    local CLUSTER_DIR="$KUBEE_CLUSTER_DIR/${CLUSTER_NAME}"
+    if [ -d "$CLUSTER_DIR" ]; then
+      echo "$CLUSTER_DIR"
+      return
+    fi
+  done
+  echo::err "No cluster directory found with the name ($CLUSTER_NAME) in"
+  echo::err "  * the distribution cluster directory (${KUBEE_RESOURCE_CLUSTERS_DIR}) "
+  echo::err "  * the paths of the KUBEE_CLUSTERS_PATH variable (${KUBEE_CLUSTERS_PATH:-'not set'})"
+  return 1
 
 }
 
 # @description
 #     Print Data Connection values for debugging purpose
 #     No args
-kubee::print_connection_env(){
+kubee::print_connection_env() {
   echo::err "Data Connection Values:"
   echo::err "KUBEE_USER_NAME             : $KUBEE_USER_NAME"
   echo::err "KUBEE_CLUSTER_NAME          : $KUBEE_CLUSTER_NAME"
@@ -284,67 +281,62 @@ kubee::print_connection_env(){
   echo::err "Did you set the cluster name or a KUBECONFIG env?"
 }
 
-
 # @description
 #     Generate a KUBECONFIG file from the pass manager
 #     No args, only global env
-kubee::print_kubeconfig_from_pass(){
+kubee::print_kubeconfig_from_pass() {
 
+  # Paths
+  PASS_CLIENT_TOKEN_PATH="$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-token"
+  PASS_CLIENT_CERT_PATH="$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-certificate-data"
+  PASS_CLIENT_KEY_DATA="$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-key-data"
+  PASS_CLUSTER_CERT_PATH="$KUBEE_PASS_HOME/clusters/$KUBEE_CLUSTER_NAME/certificate-authority-data"
+  PASS_CLUSTER_SERVER_PATH="$KUBEE_PASS_HOME/clusters/$KUBEE_CLUSTER_NAME/server"
 
-# Paths
-PASS_CLIENT_TOKEN_PATH="$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-token"
-PASS_CLIENT_CERT_PATH="$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-certificate-data"
-PASS_CLIENT_KEY_DATA="$KUBEE_PASS_HOME/users/$KUBEE_USER_NAME/client-key-data"
-PASS_CLUSTER_CERT_PATH="$KUBEE_PASS_HOME/clusters/$KUBEE_CLUSTER_NAME/certificate-authority-data"
-PASS_CLUSTER_SERVER_PATH="$KUBEE_PASS_HOME/clusters/$KUBEE_CLUSTER_NAME/server"
+  ###################
+  # Client
+  ###################
+  # Token?
+  if ! KUBEE_CLIENT_TOKEN=$(pass "$PASS_CLIENT_TOKEN_PATH" 2> /dev/null); then
+    KUBEE_CLIENT_TOKEN=""
+    if ! KUBEE_CLIENT_CERTIFICATE_DATA=$(pass "$PASS_CLIENT_CERT_PATH" 2> /dev/null); then
+      echo::err "No client token or client certificate has been found in pass at $PASS_CLIENT_TOKEN_PATH and $PASS_CLIENT_CERT_PATH respectively"
+      kubee::print_connection_env
+      return 1
+    fi
+    # Private Key
+    if ! KUBEE_CLIENT_KEY_DATA=$(pass "$PASS_CLIENT_KEY_DATA" 2> /dev/null); then
+      echo::err "No client key has been found in pass at $PASS_CLIENT_TOKEN_PATH and $PASS_CLIENT_CERT_PATH respectively"
+      kubee::print_connection_env
+      return 1
+    fi
+  fi
 
-
-###################
-# Client
-###################
-# Token?
-if ! KUBEE_CLIENT_TOKEN=$(pass "$PASS_CLIENT_TOKEN_PATH" 2>/dev/null); then
-  KUBEE_CLIENT_TOKEN=""
-  if ! KUBEE_CLIENT_CERTIFICATE_DATA=$(pass "$PASS_CLIENT_CERT_PATH" 2>/dev/null); then
-    echo::err "No client token or client certificate has been found in pass at $PASS_CLIENT_TOKEN_PATH and $PASS_CLIENT_CERT_PATH respectively"
+  ###################
+  # Cluster
+  ###################
+  if ! KUBEE_CLUSTER_CERTIFICATE_AUTHORITY_DATA=$(pass "$PASS_CLUSTER_CERT_PATH" 2> /dev/null); then
+    echo::err "No cluster certificate authority has been found in pass at $PASS_CLUSTER_CERT_PATH"
     kubee::print_connection_env
     return 1
   fi
-  # Private Key
-  if ! KUBEE_CLIENT_KEY_DATA=$(pass "$PASS_CLIENT_KEY_DATA" 2>/dev/null); then
-    echo::err "No client key has been found in pass at $PASS_CLIENT_TOKEN_PATH and $PASS_CLIENT_CERT_PATH respectively"
-    kubee::print_connection_env
-    return 1
+
+  if ! KUBEE_CLUSTER_SERVER=$(pass "$PASS_CLUSTER_SERVER_PATH" 2> /dev/null); then
+    KUBEE_CLUSTER_SERVER_IP=${KUBEE_CLUSTER_SERVER_IP:-}
+    if [ "$KUBEE_CLUSTER_SERVER_IP" == "" ]; then
+      echo::err "No cluster server could found"
+      echo::err "  No server data has been found in pass at $PASS_CLUSTER_PASS_CLUSTER_SERVER_PATH"
+      echo::err "  No server ip was defined for the env KUBEE_CLUSTER_SERVER_IP"
+      kubee::print_connection_env
+      return 1
+    fi
+    KUBEE_CLUSTER_SERVER="https://$KUBEE_CLUSTER_SERVER_IP:6443"
+    echo::debug "KUBEE_CLUSTER_SERVER ($KUBEE_CLUSTER_SERVER) built from KUBEE_CLUSTER_SERVER_IP"
+  else
+    echo::debug "KUBEE_CLUSTER_SERVER ($KUBEE_CLUSTER_SERVER) built from pass $PASS_CLUSTER_SERVER_PATH"
   fi
-fi
 
-###################
-# Cluster
-###################
-if ! KUBEE_CLUSTER_CERTIFICATE_AUTHORITY_DATA=$(pass "$PASS_CLUSTER_CERT_PATH" 2>/dev/null); then
-  echo::err "No cluster certificate authority has been found in pass at $PASS_CLUSTER_CERT_PATH"
-  kubee::print_connection_env
-  return 1
-fi
-
-
-if ! KUBEE_CLUSTER_SERVER=$(pass "$PASS_CLUSTER_SERVER_PATH" 2>/dev/null); then
-  KUBEE_CLUSTER_SERVER_IP=${KUBEE_CLUSTER_SERVER_IP:-}
-  if [ "$KUBEE_CLUSTER_SERVER_IP" == "" ]; then
-    echo::err "No cluster server could found"
-    echo::err "  No server data has been found in pass at $PASS_CLUSTER_PASS_CLUSTER_SERVER_PATH"
-    echo::err "  No server ip was defined for the env KUBEE_CLUSTER_SERVER_IP"
-    kubee::print_connection_env
-    return 1
-  fi
-  KUBEE_CLUSTER_SERVER="https://$KUBEE_CLUSTER_SERVER_IP:6443"
-  echo::debug "KUBEE_CLUSTER_SERVER ($KUBEE_CLUSTER_SERVER) built from KUBEE_CLUSTER_SERVER_IP"
-else
-  echo::debug "KUBEE_CLUSTER_SERVER ($KUBEE_CLUSTER_SERVER) built from pass $PASS_CLUSTER_SERVER_PATH"
-fi
-
-
-cat <<-EOF
+  cat <<- EOF
 apiVersion: v1
 clusters:
   - name: $KUBEE_CLUSTER_NAME
@@ -373,12 +365,12 @@ EOF
 # @description
 #     Set the KUBECONFIG env
 #     And errored if it does not exists
-kubee::set_kubeconfig_env_and_check(){
+kubee::set_kubeconfig_env_and_check() {
   kubee::set_kubeconfig_env || return $?
 
   if [ "${KUBECONFIG:-}" != "" ] && [ ! -f "$KUBECONFIG" ]; then
-   echo::err "The \$KUBECONFIG variable points to the file $KUBECONFIG that does not exist"
-   return 1
+    echo::err "The \$KUBECONFIG variable points to the file $KUBECONFIG that does not exist"
+    return 1
   fi
 
 }
@@ -389,7 +381,7 @@ kubee::set_kubeconfig_env_and_check(){
 #     Why ? because it will ask for a password at an interval if pass is used
 #     Note that this is a little bit useless if `pass` is used to store secrets in the `envrc` file of a cluster project,
 #     as it will also trigger a gpg pinentry
-kubee::set_kubeconfig_env(){
+kubee::set_kubeconfig_env() {
 
   if [ "${KUBECONFIG:-}" != "" ]; then
     echo::debug "KUBECONFIG env already set to: $KUBECONFIG"
@@ -397,7 +389,7 @@ kubee::set_kubeconfig_env(){
   fi
 
   export KUBECONFIG="$HOME/.kube/config"
-  if  [ -f "$KUBECONFIG" ]; then
+  if [ -f "$KUBECONFIG" ]; then
     echo::debug "KUBECONFIG set to the existing default config file: $KUBECONFIG"
     return
   fi
@@ -427,7 +419,7 @@ kubee::set_kubeconfig_env(){
 
 # @description
 #     Set the global env
-kubee::set_env(){
+kubee::set_env() {
 
   # Tmp dir
   # TMPDIR, TEMP and TMP may not be always set at the same time
@@ -449,7 +441,9 @@ kubee::set_env(){
   export KUBEE_RESOURCE_STABLE_CHARTS_DIR
   # Kubee Home - the home directory
   # Why? Because if you use eval command with source, the BASH_SOURCE[0] becomes tmp
-  KUBEE_RESOURCE_STABLE_CHARTS_DIR=$(realpath "$KUBEE_HOME/charts")
+  if ! KUBEE_RESOURCE_STABLE_CHARTS_DIR=$(realpath "$KUBEE_RESOURCES_DIR/charts" 2> /dev/null); then
+    echo "Warning: Release charts were not found (location $KUBEE_RESOURCES_DIR/charts)"
+  fi
 
   # The cluster
   KUBEE_CLUSTER_NAME=${KUBEE_CLUSTER_NAME:-}
@@ -462,33 +456,30 @@ kubee::set_env(){
     # Used in all function
     KUBEE_ENV_FILE="${KUBEE_CLUSTER_ENV_FILE:-"$KUBEE_CLUSTER_DIR/.envrc"}"
     if [ -f "$KUBEE_ENV_FILE" ]; then
-       echo::debug "Sourcing cluster env file $KUBEE_ENV_FILE"
-       # shellcheck disable=SC1090
-       if ! source "$KUBEE_ENV_FILE"; then
-         echo::err "Error while importing the envrc file $KUBEE_ENV_FILE"
-         return 1
-       fi
+      echo::debug "Sourcing cluster env file $KUBEE_ENV_FILE"
+      # shellcheck disable=SC1090
+      if ! source "$KUBEE_ENV_FILE"; then
+        echo::err "Error while importing the envrc file $KUBEE_ENV_FILE"
+        return 1
+      fi
     fi
 
     KUBEE_CLUSTER_VALUES_FILE="$KUBEE_CLUSTER_DIR/values.yaml"
     if [ ! -f "$KUBEE_CLUSTER_VALUES_FILE" ]; then
-       echo::err "Cluster values file does not exist $KUBEE_CLUSTER_VALUES_FILE"
-       return 1
+      echo::err "Cluster values file does not exist $KUBEE_CLUSTER_VALUES_FILE"
+      return 1
     fi
 
   fi
-
 
   #############################
   # All env with default value
   # Should be after app envrc call
   #############################
 
-
   ## Connection namespace
   # The namespace for the connection (in the kubectx kubeconfig context)
   KUBEE_CHART_NAMESPACE=${KUBEE_CHART_NAMESPACE:-"default"}
-
 
   # The username for the connection (in the kubeconfig context)"
   KUBEE_USER_NAME=${KUBEE_USER_NAME:-"default"}
@@ -505,23 +496,21 @@ kubee::set_env(){
   # The busybox image to use for a shell in a busybox or ephemeral container"
   KUBEE_BUSYBOX_IMAGE=${KUBEE_BUSYBOX_IMAGE:-ghcr.io/gerardnico/busybox:latest}
 
-
 }
 
 # Return the cluster files with all variables expanded
-kubee::get_cluster_values_file(){
-
+kubee::get_cluster_values_file() {
 
   ############################
   # Variable Substitution
   # Check the variables
   if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBEE_CLUSTER_VALUES_FILE"); then
-     # Should exit because of the strict mode
-     # but it was not working
-     echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUBEE_CLUSTER_VALUES_FILE"
-     return 1
+    # Should exit because of the strict mode
+    # but it was not working
+    echo::err "Values variables missing: ${UNDEFINED_VARS[*]} in file $KUBEE_CLUSTER_VALUES_FILE"
+    return 1
   fi
-  local OUTPUT_DIR;
+  local OUTPUT_DIR
   OUTPUT_DIR=${CHART_OUTPUT_VALUES_DIR:-$KUBEE_RUNTIME_DIR}
   local CLUSTER_VALUES_FILE="$OUTPUT_DIR/cluster-values-after-env-expansion.yml"
   envsubst < "$KUBEE_CLUSTER_VALUES_FILE" >| "$CLUSTER_VALUES_FILE"
@@ -537,65 +526,64 @@ kubee::get_cluster_values_file(){
 # * the chart values
 #
 # @env The cluster directory: KUBEE_CLUSTER_DIR
-kubee::get_cluster_values_files_for_chart(){
+kubee::get_cluster_values_files_for_chart() {
 
-    local KUBEE_CLUSTER_DIR=${KUBEE_CLUSTER_DIR:-}
-    if [ "$KUBEE_CLUSTER_DIR" == "" ]; then
-      echo::err "No Cluster specified"
-      echo::debug "The Cluster env KUBEE_CLUSTER_DIR is empty"
-      return 1
+  local KUBEE_CLUSTER_DIR=${KUBEE_CLUSTER_DIR:-}
+  if [ "$KUBEE_CLUSTER_DIR" == "" ]; then
+    echo::err "No Cluster specified"
+    echo::debug "The Cluster env KUBEE_CLUSTER_DIR is empty"
+    return 1
+  fi
+
+  # Alias
+  # We just get rid of the crds for the CRD chart
+  local ACTUAL_CHART_ALIAS
+  ACTUAL_CHART_ALIAS=$(echo "${CHART_NAME#"$CRD_SUFFIX"}" | tr "-" "_")
+
+  local CLUSTER_FILES=()
+
+  # Cluster files
+  local CLUSTER_VALUES_FILE
+  CLUSTER_VALUES_FILE=$(kubee::get_cluster_values_file)
+  CLUSTER_FILES+=("$CLUSTER_VALUES_FILE")
+
+  local OUTPUT_DIR
+  OUTPUT_DIR=${CHART_OUTPUT_VALUES_DIR:-$KUBEE_RUNTIME_DIR}
+  # Extraction of the values in the cluster values files for the current chart
+  # The cluster values need to lose their scope
+  local CLUSTER_CHART_VALUES_FILE="$OUTPUT_DIR/cluster-chart-values.yml"
+  local CHART_VALUES
+  CHART_VALUES=$(echo::eval "yq '.$ACTUAL_CHART_ALIAS' $CLUSTER_VALUES_FILE")
+  if [ "$CHART_VALUES" == "null" ]; then
+    # CRD chart does not have any value in the cluster values files
+    if [ "$CHART_TYPE" != "crds" ]; then
+      echo::warn "No values found for the actual chart $ACTUAL_CHART_ALIAS in the cluster value file $KUBEE_CLUSTER_VALUES_FILE"
     fi
-
-    # Alias
-    # We just get rid of the crds for the CRD chart
-    local ACTUAL_CHART_ALIAS
-    ACTUAL_CHART_ALIAS=$(echo "${CHART_NAME#"$CRD_SUFFIX"}" | tr "-" "_");
-
-    local CLUSTER_FILES=()
-
-    # Cluster files
-    local CLUSTER_VALUES_FILE
-    CLUSTER_VALUES_FILE=$(kubee::get_cluster_values_file)
-    CLUSTER_FILES+=("$CLUSTER_VALUES_FILE")
-
-    local OUTPUT_DIR;
-    OUTPUT_DIR=${CHART_OUTPUT_VALUES_DIR:-$KUBEE_RUNTIME_DIR}
-    # Extraction of the values in the cluster values files for the current chart
-    # The cluster values need to lose their scope
-    local CLUSTER_CHART_VALUES_FILE="$OUTPUT_DIR/cluster-chart-values.yml"
-    local CHART_VALUES;
-    CHART_VALUES=$(echo::eval "yq '.$ACTUAL_CHART_ALIAS' $CLUSTER_VALUES_FILE")
-    if [ "$CHART_VALUES" == "null" ]; then
-      # CRD chart does not have any value in the cluster values files
-      if [ "$CHART_TYPE" != "crds" ]; then
-        echo::warn "No values found for the actual chart $ACTUAL_CHART_ALIAS in the cluster value file $KUBEE_CLUSTER_VALUES_FILE"
-      fi
-      echo "${CLUSTER_FILES[@]}"
-      return
-    fi
-    # Write the value to the file
-    echo "$CHART_VALUES" >| "$CLUSTER_CHART_VALUES_FILE";
-    CLUSTER_FILES+=("$CLUSTER_CHART_VALUES_FILE")
-    echo::debug "Returned the cluster chart values files $CLUSTER_CHART_VALUES_FILE"
-
-    # Deletion of the actual chart property in the cluster values file does not occur anymore
-    #
-    # Why? So that the helm chart developer can reference the value with a full qualified name
-    #
-    # For example, in cert manager values.yaml, the reference {{ .Values.cert_manager.hostname }}
-    # will be always available,
-    # * when installing cert_manager
-    # * but also when installing any another dependent chart.
-    #
-    # Deprecated: Delete the properties in the cluster values file
-    # echo::debug "Delete the property $ACTUAL_CHART_ALIAS of the cluster values files for cleanness"
-    # yq -i "del(.$ACTUAL_CHART_ALIAS)" "$CLUSTER_VALUES_FILE"
-
-    # return
     echo "${CLUSTER_FILES[@]}"
+    return
+  fi
+  # Write the value to the file
+  echo "$CHART_VALUES" >| "$CLUSTER_CHART_VALUES_FILE"
+  CLUSTER_FILES+=("$CLUSTER_CHART_VALUES_FILE")
+  echo::debug "Returned the cluster chart values files $CLUSTER_CHART_VALUES_FILE"
+
+  # Deletion of the actual chart property in the cluster values file does not occur anymore
+  #
+  # Why? So that the helm chart developer can reference the value with a full qualified name
+  #
+  # For example, in cert manager values.yaml, the reference {{ .Values.cert_manager.hostname }}
+  # will be always available,
+  # * when installing cert_manager
+  # * but also when installing any another dependent chart.
+  #
+  # Deprecated: Delete the properties in the cluster values file
+  # echo::debug "Delete the property $ACTUAL_CHART_ALIAS of the cluster values files for cleanness"
+  # yq -i "del(.$ACTUAL_CHART_ALIAS)" "$CLUSTER_VALUES_FILE"
+
+  # return
+  echo "${CLUSTER_FILES[@]}"
 
 }
-
 
 # @description
 #     Print the kubee values file for the chart
@@ -603,17 +591,17 @@ kubee::get_cluster_values_files_for_chart(){
 #
 # @stdout - the values
 # @args $1 - the chart name
-kubee::print_chart_values(){
+kubee::print_chart_values() {
 
   local CHART_NAME="$1"
-  local CHART_DIRECTORY;
+  local CHART_DIRECTORY
   if ! CHART_DIRECTORY=$(kubee::get_chart_directory "$CHART_NAME"); then
     echo::err "The chart $CHART_NAME could not be found"
     exit 1
   fi
 
   # Context
-  local ACTUAL_CHART_FILE="$CHART_DIRECTORY/Chart.yaml";
+  local ACTUAL_CHART_FILE="$CHART_DIRECTORY/Chart.yaml"
 
   if [ ! -f "$ACTUAL_CHART_FILE" ]; then
     echo::err "No actual Chart file found ($ACTUAL_CHART_FILE does not exists)"
@@ -624,103 +612,101 @@ kubee::print_chart_values(){
   local CHART_VALUES_FILES=()
 
   # Add dependencies
-  local DEPENDENCIES;
+  local DEPENDENCIES
   DEPENDENCIES="$(yq -r '.dependencies[] | [ (.name // "") + "," + (.alias // "") + "," + (.repository // "") + "," + ( .version // "")] | join("\n")' "$ACTUAL_CHART_FILE")"
   if [ "$DEPENDENCIES" != "" ]; then
     # Loop over the dependencies
     while IFS=, read -r DEPENDENCY_CHART_NAME DEPENDENCY_CHART_ALIAS DEPENDENCY_CHART_REPOSITORY DEPENDENCY_CHART_VERSION; do
 
-              if [ "$DEPENDENCY_CHART_NAME" == "" ] || [ "$DEPENDENCY_CHART_NAME" == "null" ]; then
-                    echo::err "All dependency should have an name"
-                    echo::err "The repository $DEPENDENCY_CHART_REPOSITORY does not have one"
-                    return 1
-              fi
+      if [ "$DEPENDENCY_CHART_NAME" == "" ] || [ "$DEPENDENCY_CHART_NAME" == "null" ]; then
+        echo::err "All dependency should have an name"
+        echo::err "The repository $DEPENDENCY_CHART_REPOSITORY does not have one"
+        return 1
+      fi
 
-              # We don't add external values files
-              # They may use template:
-              # name: {{ include "mailu.database.roundcube.secretName" . }}
-              # and we get the error: error calling include: template: no template "mailu.database.roundcube.secretName" associated with template "gotpl"
-              # Ref: https://github.com/Mailu/helm-charts/blob/98da259e46bf366ca03d7a9d3352d74c5bff7c66/mailu/values.yaml#L376
-              # Otherwise we would need to create a copy of this chart with only the `values.yaml` template of the values chart
-              if [[ $DEPENDENCY_CHART_NAME != kubee* ]]; then
-                echo::debug "Skipped non kubee dependency chart $DEPENDENCY_CHART_NAME"
-                continue;
-              fi
+      # We don't add external values files
+      # They may use template:
+      # name: {{ include "mailu.database.roundcube.secretName" . }}
+      # and we get the error: error calling include: template: no template "mailu.database.roundcube.secretName" associated with template "gotpl"
+      # Ref: https://github.com/Mailu/helm-charts/blob/98da259e46bf366ca03d7a9d3352d74c5bff7c66/mailu/values.yaml#L376
+      # Otherwise we would need to create a copy of this chart with only the `values.yaml` template of the values chart
+      if [[ $DEPENDENCY_CHART_NAME != kubee* ]]; then
+        echo::debug "Skipped non kubee dependency chart $DEPENDENCY_CHART_NAME"
+        continue
+      fi
 
+      # Alias is not mandatory and sometimes
+      # You can't even change it (ie kubernetes-dashboard)
+      # We generate a kubee alias
+      if [ "$DEPENDENCY_CHART_ALIAS" == "" ] || [ "$DEPENDENCY_CHART_ALIAS" == "null" ]; then
+        DEPENDENCY_CHART_ALIAS="$(echo "$DEPENDENCY_CHART_NAME" | tr "-" "_")"
+        echo::debug "No alias found for the chart $DEPENDENCY_CHART_NAME. Alias generated to $DEPENDENCY_CHART_ALIAS"
+      fi
+      # The non-scoped dependency value file
+      local SHM_DEPENDENCY_CHART_VALUES_FILE="$CHART_OUTPUT_VALUES_DIR/${DEPENDENCY_CHART_ALIAS}_default_non_scoped.yml"
+      # In case of a symlink, the values file is in the charts directory
+      local LOCAL_DEPENDENCY_CHART_PATH="$CHART_DIRECTORY/charts/$DEPENDENCY_CHART_NAME"
+      if [ -d "$LOCAL_DEPENDENCY_CHART_PATH" ]; then
+        local LOCAL_DEPENDENCY_CHART_VALUES_FILE="$LOCAL_DEPENDENCY_CHART_PATH/values.yaml"
+        if [ -f "$LOCAL_DEPENDENCY_CHART_VALUES_FILE" ]; then
+          cp -f "$LOCAL_DEPENDENCY_CHART_VALUES_FILE" "$SHM_DEPENDENCY_CHART_VALUES_FILE"
+        else
+          echo::warn "The dependency chart $DEPENDENCY_CHART_NAME found in charts/ has no values file"
+          touch "$SHM_DEPENDENCY_CHART_VALUES_FILE"
+        fi
+      else
+        echo::debug "The dependency chart $DEPENDENCY_CHART_NAME was not found locally at $LOCAL_DEPENDENCY_CHART_PATH"
+        # Retrieve the value file with the show values command
+        local HELM_SHOW_VALUE_COMMAND=(
+          'helm' 'show' 'values'
+        )
+        if [ "$DEPENDENCY_CHART_REPOSITORY" == "" ]; then
+          echo::err "The dependency chart $DEPENDENCY_CHART_NAME has no repository"
+          echo::err "A dependency that is not in the charts/ directory should have a repository in Chart.yaml or be pulled into the charts/ directory."
+          return 1
+        fi
+        case "$DEPENDENCY_CHART_REPOSITORY" in
+          file://.*)
+            # Local
+            # The name of the chart is the path to the chart directory
+            # Delete the file scheme (not supported by `helm get values`)
+            DEPENDENCY_CHART="$CHART_DIRECTORY/${DEPENDENCY_CHART_REPOSITORY#"file://"}"
+            HELM_SHOW_VALUE_COMMAND+=("$DEPENDENCY_CHART")
+            ;;
+          *)
+            # Other scheme: Http, Oci scheme, ...
+            HELM_SHOW_VALUE_COMMAND+=("--repo" "$DEPENDENCY_CHART_REPOSITORY")
+            HELM_SHOW_VALUE_COMMAND+=("--version" "$DEPENDENCY_CHART_VERSION")
+            HELM_SHOW_VALUE_COMMAND+=("$DEPENDENCY_CHART_NAME")
+            ;;
+        esac
 
-              # Alias is not mandatory and sometimes
-              # You can't even change it (ie kubernetes-dashboard)
-              # We generate a kubee alias
-              if [ "$DEPENDENCY_CHART_ALIAS" == "" ] || [ "$DEPENDENCY_CHART_ALIAS" == "null" ]; then
-                DEPENDENCY_CHART_ALIAS="$(echo "$DEPENDENCY_CHART_NAME" | tr "-" "_")"
-                echo::debug "No alias found for the chart $DEPENDENCY_CHART_NAME. Alias generated to $DEPENDENCY_CHART_ALIAS"
-              fi
-              # The non-scoped dependency value file
-              local SHM_DEPENDENCY_CHART_VALUES_FILE="$CHART_OUTPUT_VALUES_DIR/${DEPENDENCY_CHART_ALIAS}_default_non_scoped.yml"
-              # In case of a symlink, the values file is in the charts directory
-              local LOCAL_DEPENDENCY_CHART_PATH="$CHART_DIRECTORY/charts/$DEPENDENCY_CHART_NAME"
-              if [ -d "$LOCAL_DEPENDENCY_CHART_PATH" ]; then
-                local LOCAL_DEPENDENCY_CHART_VALUES_FILE="$LOCAL_DEPENDENCY_CHART_PATH/values.yaml"
-                if [ -f "$LOCAL_DEPENDENCY_CHART_VALUES_FILE" ]; then
-                  cp -f "$LOCAL_DEPENDENCY_CHART_VALUES_FILE" "$SHM_DEPENDENCY_CHART_VALUES_FILE"
-                else
-                  echo::warn "The dependency chart $DEPENDENCY_CHART_NAME found in charts/ has no values file"
-                  touch "$SHM_DEPENDENCY_CHART_VALUES_FILE"
-                fi
-              else
-                echo::debug "The dependency chart $DEPENDENCY_CHART_NAME was not found locally at $LOCAL_DEPENDENCY_CHART_PATH"
-                # Retrieve the value file with the show values command
-                local HELM_SHOW_VALUE_COMMAND=(
-                  'helm' 'show' 'values'
-                )
-                if [ "$DEPENDENCY_CHART_REPOSITORY" == "" ]; then
-                  echo::err "The dependency chart $DEPENDENCY_CHART_NAME has no repository"
-                  echo::err "A dependency that is not in the charts/ directory should have a repository in Chart.yaml or be pulled into the charts/ directory."
-                  return 1
-                fi
-                case "$DEPENDENCY_CHART_REPOSITORY" in
-                  file://.*)
-                    # Local
-                    # The name of the chart is the path to the chart directory
-                    # Delete the file scheme (not supported by `helm get values`)
-                    DEPENDENCY_CHART="$CHART_DIRECTORY/${DEPENDENCY_CHART_REPOSITORY#"file://"}"
-                    HELM_SHOW_VALUE_COMMAND+=("$DEPENDENCY_CHART")
-                  ;;
-                  *)
-                    # Other scheme: Http, Oci scheme, ...
-                    HELM_SHOW_VALUE_COMMAND+=("--repo" "$DEPENDENCY_CHART_REPOSITORY")
-                    HELM_SHOW_VALUE_COMMAND+=("--version" "$DEPENDENCY_CHART_VERSION")
-                    HELM_SHOW_VALUE_COMMAND+=("$DEPENDENCY_CHART_NAME")
-                  ;;
-                esac
+        HELM_SHOW_VALUE_COMMAND+=(">| $SHM_DEPENDENCY_CHART_VALUES_FILE")
+        # 2>COMMAND_STDOUT_FD to silence: walk.go:75: found symbolic link in path
+        HELM_SHOW_VALUE_COMMAND+=("2>$COMMAND_STDOUT_FD")
+        # In the following command, we cd in tempdir
+        # because when the current directory is a Chart directory such as dex
+        # We get: Error: Chart.yaml file is missing
+        # No idea why???
+        if ! echo::eval "cd ${TMPDIR};${HELM_SHOW_VALUE_COMMAND[*]}"; then
+          echo::err "Error while trying to the get values for the Chart $DEPENDENCY_CHART_ALIAS"
+          return 1
+        fi
+      fi
 
-                HELM_SHOW_VALUE_COMMAND+=(">| $SHM_DEPENDENCY_CHART_VALUES_FILE")
-                # 2>COMMAND_STDOUT_FD to silence: walk.go:75: found symbolic link in path
-                HELM_SHOW_VALUE_COMMAND+=("2>$COMMAND_STDOUT_FD")
-                # In the following command, we cd in tempdir
-                # because when the current directory is a Chart directory such as dex
-                # We get: Error: Chart.yaml file is missing
-                # No idea why???
-                if ! echo::eval "cd ${TMPDIR};${HELM_SHOW_VALUE_COMMAND[*]}"; then
-                  echo::err "Error while trying to the get values for the Chart $DEPENDENCY_CHART_ALIAS"
-                  return 1
-                fi
-              fi
-
-              # Scoping (ie adding the alias to the dependency values file)
-              # The default value should be under the alias key (ie scoped)
-              local DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE="$CHART_OUTPUT_VALUES_DIR/${DEPENDENCY_CHART_ALIAS}_default.yml"
-              # --null-input flag: does not have any input as we create a new file
-              if ! echo::eval "yq eval --null-input '.$DEPENDENCY_CHART_ALIAS = (load(\"$SHM_DEPENDENCY_CHART_VALUES_FILE\"))' >| $DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE"; then
-                echo::err "Error while processing the chart values file $SHM_DEPENDENCY_CHART_VALUES_FILE"
-                return 1
-              fi
-              rm "$SHM_DEPENDENCY_CHART_VALUES_FILE"
-              CHART_VALUES_FILES+=("$DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE")
-              echo::debug "Values file generated: ${DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE}"
+      # Scoping (ie adding the alias to the dependency values file)
+      # The default value should be under the alias key (ie scoped)
+      local DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE="$CHART_OUTPUT_VALUES_DIR/${DEPENDENCY_CHART_ALIAS}_default.yml"
+      # --null-input flag: does not have any input as we create a new file
+      if ! echo::eval "yq eval --null-input '.$DEPENDENCY_CHART_ALIAS = (load(\"$SHM_DEPENDENCY_CHART_VALUES_FILE\"))' >| $DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE"; then
+        echo::err "Error while processing the chart values file $SHM_DEPENDENCY_CHART_VALUES_FILE"
+        return 1
+      fi
+      rm "$SHM_DEPENDENCY_CHART_VALUES_FILE"
+      CHART_VALUES_FILES+=("$DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE")
+      echo::debug "Values file generated: ${DEPENDENCY_CHART_VALUES_FILE_WITH_SCOPE}"
     done <<< "$DEPENDENCIES"
   fi
-
 
   # Chart Own values files
   # Should be after the dependency so that in the merge they have priorities
@@ -744,7 +730,6 @@ kubee::print_chart_values(){
   IFS=" " read -ra CLUSTER_VALUE_FILES_ARRAY <<< "${CLUSTER_VALUE_FILES}"
   CHART_VALUES_FILES+=("${CLUSTER_VALUE_FILES_ARRAY[@]}")
 
-
   ###########################
   # Merge with helm itself
   # shellcheck disable=SC2016
@@ -753,8 +738,8 @@ kubee::print_chart_values(){
   # Values are merged from left to right
   local PATH_VALUES_CHART
   if ! PATH_VALUES_CHART=$(kubee::get_chart_directory "values"); then
-      echo::debug "Internal error no chart directory found with the names values"
-      return
+    echo::debug "Internal error no chart directory found with the names values"
+    return
   fi
   # Note
   # `yq --no-doc` at the end delete the doc separator `---`
@@ -763,17 +748,16 @@ kubee::print_chart_values(){
   # ---
   ## Source: kubee-values/templates/values.yaml
   if ! echo::eval "helm template fake-release-name $PATH_VALUES_CHART --show-only templates/values.yaml -f $(array::join --sep ' -f ' "${CHART_VALUES_FILES[@]}") | yq --no-doc 'select(document_index == 0)'"; then
-     echo::err "Error while merging the yaml files"
-     return 1
+    echo::err "Error while merging the yaml files"
+    return 1
   fi
 
 }
 
-
 # @description
 #     Return the directory of a chart
 # @arg $1 string The chart name
-kubee::get_chart_directory(){
+kubee::get_chart_directory() {
 
   local CHART_NAME="$1"
   # All packages directories in an array
@@ -781,15 +765,15 @@ kubee::get_chart_directory(){
   IFS=":" read -ra KUBEE_CHARTS_DIRS <<< "${KUBEE_CHARTS_PATH:-}"
   local KUBEE_CHARTS_DIRS+=("$KUBEE_RESOURCE_STABLE_CHARTS_DIR")
   for KUBEE_PACKAGES_DIR in "${KUBEE_CHARTS_DIRS[@]}"; do
-      if [ ! -d "$KUBEE_PACKAGES_DIR" ]; then
-        echo::warn "The path ($KUBEE_PACKAGES_DIR) set in KUBEE_CHARTS_PATH does not exist or is not a directory"
-        continue
-      fi
-      local APP_DIR="$KUBEE_PACKAGES_DIR/${CHART_NAME}"
-      if [ -d "$APP_DIR" ]; then
-        echo "$APP_DIR"
-        return
-      fi
+    if [ ! -d "$KUBEE_PACKAGES_DIR" ]; then
+      echo::warn "The path ($KUBEE_PACKAGES_DIR) set in KUBEE_CHARTS_PATH does not exist or is not a directory"
+      continue
+    fi
+    local APP_DIR="$KUBEE_PACKAGES_DIR/${CHART_NAME}"
+    if [ -d "$APP_DIR" ]; then
+      echo "$APP_DIR"
+      return
+    fi
   done
   return 1
 

@@ -9,6 +9,8 @@ class {{brewFormulaName}} < Formula
   version "{{projectVersion}}"
   sha256 "{{distributionChecksumSha256}}"
   license "{{projectLicense}}"
+  # https://rubydoc.brew.sh/Formula#head-class_method
+  head "https://github.com/bytle/kubee.git", branch: "main"
 
   {{#brewHasLivecheck}}
   livecheck do
@@ -17,7 +19,6 @@ class {{brewFormulaName}} < Formula
     {{/brewLivecheck}}
   end
   {{/brewHasLivecheck}}
-
 
   {{#brewDependencies}}
   depends_on {{.}}
@@ -34,14 +35,17 @@ class {{brewFormulaName}} < Formula
     # man1.install Dir["man1/*.1"]
 
     # Library installation
-    libexec.install Dir["lib/*.sh"]
-    # Not: lib.install Dir["lib/*.sh"]
+    libexec.install "lib"
+    # Not `lib.install "lib"`
     # because it will install it as shared library
     # and we get the following link problem
-    # libxxx is a symlink belonging to giture. You can unlink it
+    # libxxx is a symlink belonging to xxx. You can unlink it
 
     # Installing the charts
-    pkgshare.install "charts"
+    libexec.install "charts"
+
+    # Installing the examples (clusters for documentation)
+    libexec.install "examples"
 
     # Injecting the path and version in the header
     Dir["#{bin}/*"].each do |f|
@@ -50,7 +54,14 @@ class {{brewFormulaName}} < Formula
       content = File.read(f).lines
       new_header = <<~EOS
         #!/usr/bin/env bash
-        BASHLIB_PATH="#{libexec}"
+        BASHLIB_PATH="#{libexec}/lib"
+        export KUBEE_CHARTS_PATH
+        if [ ${KUBEE_CHARTS_PATH:-} == "" ]; then
+            KUBEE_CHARTS_PATH="#{libexec}/charts"
+        else
+            KUBEE_CHARTS_PATH="#{libexec}/charts:$KUBEE_CHARTS_PATH"
+        fi
+        export KUBEE_RESOURCES_DIR="#{libexec}"
         PROJECT_VERSION="{{projectVersion}}"
       EOS
 
@@ -82,7 +93,7 @@ end
     # The installed folder is not in the path, so use the entire path to any
     # executables being tested: `system bin/"program", "do", "something"`.
 
-    output = shell_output("#{bin}/git-exec --help")
+    output = shell_output("#{bin}/kubee --help")
     # assert_match "{{projectVersion}}", output
 
   end

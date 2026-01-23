@@ -43,13 +43,14 @@ while [[ $# -gt 0 ]]; do
 done
 echo "Release with bump type: $BUMP_TYPE"
 
+INITIAL_VERSION="0.1.0" # by default it's 0.1.0
 if [ "$BUMP_TYPE" != "$BUMP_SNAPSHOT_TYPE" ]; then
   # Get the next version
-  export GIT_CLIFF__BUMP__INITIAL_TAG=v0.1.0 # by default it's 0.1.0
+  export GIT_CLIFF__BUMP__INITIAL_TAG="v$INITIAL_VERSION"
   release_version=$(git cliff --unreleased --bump "$BUMP_TYPE" --context --tag-pattern "v[0-9]+\\.[0-9]+\\.[0-9]+" | jq -r '.[0].version' | tr -d "v")
 else
   # come from Jreleaser
-  release_version='1.0.0-SNAPSHOT'
+  release_version="$INITIAL_VERSION-SNAPSHOT"
 fi
 
 export BUILD_DIR="out"
@@ -82,6 +83,12 @@ if [ "$GOAL" == "$ASSEMBLE_GOAL" ]; then
   exit
 fi
 
+# JReleaser goody release.github.token must not be blank.
+# even with `prepare`, we need to set the github token ???
+export JRELEASER_GITHUB_TOKEN
+JRELEASER_GITHUB_TOKEN=$(pass bytle/github/release-token)
+
+# Prepare
 if [ "$GOAL" == "$PREPARE_GOAL" ]; then
   jreleaser prepare --config-file "$JRELEASER_CONF"
   echo "Prepare only version $release_version done"

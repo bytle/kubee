@@ -3,7 +3,10 @@
 collections:
   - name: https://github.com/k3s-io/k3s-ansible.git
     type: git
-    version: 2a5a89a  # specify branch/tag/commit
+    version: 2a5a89a  # specify branch/tag/commit - Nov 12, 2024
   # With just the collection name
   # At installation: 'ans_e.ans_e_base:1.0.0' is already installed, skipping.
-  - name: ans_e.ans_e_base
+  # name: ans_e.ans_e_base # for local development only
+  - name: https://github.com/gerardnico/ansible-e-base-collection
+    type: git
+    version: 2b3b8db

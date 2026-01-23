@@ -64,6 +64,8 @@ assemble:
           output: lib # path in the archive
         - input: charts
           output: charts # path in the archive
+        - input: examples
+          output: examples # path in the archive
 
 # Create a GitHub release
 # https://jreleaser.org/guide/latest/reference/release/github.html
@@ -103,10 +105,8 @@ distributions:
       # No schema validation because it's setup to an array, but it's a map asked
       # noinspection YAMLSchemaValidation
       dependencies:
-        coreutils: 'null'
-        git: 'null'
-        openssh: 'null'
-        curl: 'null'
+        # https://formulae.brew.sh/formula/ansible
+        ansible: 'null'
       extraProperties:
         # Don't add java as dependency
         # https://jreleaser.org/guide/latest/reference/packagers/homebrew.html#_jdk_dependency

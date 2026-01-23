@@ -2,10 +2,8 @@
 # Kubee Helmet k3s-ansible cluster driver that installs k3s
 # https://github.com/k3s-io/k3s-ansible
 
-
-
 # The synopsis function is required by the doc::usage
-synopsis(){
+synopsis() {
 
   cat << EOF
 
@@ -27,122 +25,118 @@ where:
   * \`shell\`              - Get a shell in the cluster
   * \`uninstall\`          - Uninstall k3s
   * \`upgrade\`            - Upgrade k3s
+  * \`ansible-req\`        - Reinstall locally the required ansible collection (happen automatically if not found)
 
 EOF
 
 }
 
 if [ "${1:-}" == "synopsis" ]; then
-   synopsis
-   exit
+  synopsis
+  exit
 fi
 
-ansible_inventory_file(){
+ansible_inventory_file() {
 
-   # Inventory
-   local KUBEE_INVENTORY_FILE="${KUBEE_INFRA_INVENTORY_FILE:-"$KUBEE_CLUSTER_DIR/ansible-inventory.yml"}"
+  # Inventory
+  local KUBEE_INVENTORY_FILE="${KUBEE_INFRA_INVENTORY_FILE:-"$KUBEE_CLUSTER_DIR/ansible-inventory.yml"}"
 
-   # If there is non, we generate one with the kubee infra chart
-   if [ ! -f "$KUBEE_INVENTORY_FILE" ]; then
+  # If there is non, we generate one with the kubee infra chart
+  if [ ! -f "$KUBEE_INVENTORY_FILE" ]; then
 
-     echo::debug "Cluster ansible inventory file $KUBEE_INVENTORY_FILE does not exist, using the kubee inventory chart output"
-     KUBEE_INVENTORY_FILE="/dev/shm/kubee-infra-inventory.yml"
-     # Log level of the sub command
-     local BASHLIB_INFRA_TEMPLATE_LEVEL=$BASHLIB_ECHO_WARNING_LEVEL
-     # If command or debug message, log also them in the template
-     if [ "$BASHLIB_ECHO_LEVEL" -ge "$BASHLIB_ECHO_COMMAND_LEVEL" ]; then
-       BASHLIB_INFRA_TEMPLATE_LEVEL=$BASHLIB_ECHO_LEVEL
-     fi
-     if ! echo::eval "BASHLIB_ECHO_LEVEL=$BASHLIB_INFRA_TEMPLATE_LEVEL; source kubee-helmet-helm template -s templates/ansible-inventory.yml 2>$COMMAND_STDOUT_FD >| $KUBEE_INVENTORY_FILE"; then
-       echo::err "An error occurred while templating the k3s-ansible chart"
-       return 1
-     fi
-     echo "$KUBEE_INVENTORY_FILE"
-     return
+    echo::debug "Cluster ansible inventory file $KUBEE_INVENTORY_FILE does not exist, using the kubee inventory chart output"
+    KUBEE_INVENTORY_FILE="/dev/shm/kubee-infra-inventory.yml"
+    # Log level of the sub command
+    local BASHLIB_INFRA_TEMPLATE_LEVEL=$BASHLIB_ECHO_WARNING_LEVEL
+    # If command or debug message, log also them in the template
+    if [ "$BASHLIB_ECHO_LEVEL" -ge "$BASHLIB_ECHO_COMMAND_LEVEL" ]; then
+      BASHLIB_INFRA_TEMPLATE_LEVEL=$BASHLIB_ECHO_LEVEL
+    fi
+    if ! echo::eval "BASHLIB_ECHO_LEVEL=$BASHLIB_INFRA_TEMPLATE_LEVEL; source kubee-helmet-helm template -s templates/ansible-inventory.yml 2>$COMMAND_STDOUT_FD >| $KUBEE_INVENTORY_FILE"; then
+      echo::err "An error occurred while templating the k3s-ansible chart"
+      return 1
+    fi
+    echo "$KUBEE_INVENTORY_FILE"
+    return
 
-   fi
+  fi
 
-   # Minimal templating with envsubst
-   # Check the variables
-   if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBEE_INVENTORY_FILE"); then
-     # Should exit because of the strict mode
-     # but it was not working
-     echo::err "Inventory variables missing: ${UNDEFINED_VARS[*]}"
-     return 1
-   fi
-   local SHM_INVENTORY_FILE="/dev/shm/kubee-ansible-inventory.yml"
+  # Minimal templating with envsubst
+  # Check the variables
+  if ! UNDEFINED_VARS=$(template::check_vars -f "$KUBEE_INVENTORY_FILE"); then
+    # Should exit because of the strict mode
+    # but it was not working
+    echo::err "Inventory variables missing: ${UNDEFINED_VARS[*]}"
+    return 1
+  fi
+  local SHM_INVENTORY_FILE="/dev/shm/kubee-ansible-inventory.yml"
 
-   echo::eval "envsubst < $KUBEE_INVENTORY_FILE >| $SHM_INVENTORY_FILE"
-   echo "$SHM_INVENTORY_FILE"
-
+  echo::eval "envsubst < $KUBEE_INVENTORY_FILE >| $SHM_INVENTORY_FILE"
+  echo "$SHM_INVENTORY_FILE"
 
 }
 
-upgrade(){
+upgrade() {
   if ! inventory=$(ansible_inventory_file); then
-      echo::err "Error while generating the ansible inventory file"
-      return 1
+    echo::err "Error while generating the ansible inventory file"
+    return 1
   fi
   set_private_key_file
   ansible-playbook -i "$inventory" k3s.orchestration.upgrade.yml
 }
 
-install_play(){
+install_play() {
   if ! inventory=$(ansible_inventory_file); then
-      echo::err "Error while generating the ansible inventory file"
-      return 1
+    echo::err "Error while generating the ansible inventory file"
+    return 1
   fi
   set_private_key_file
   ansible-playbook -i "$inventory" ans_e.ans_e_base.kubee_site.yml
 }
 
-restart(){
+restart() {
   if ! inventory=$(ansible_inventory_file); then
-      echo::err "Error while generating the ansible inventory file"
-      return 1
+    echo::err "Error while generating the ansible inventory file"
+    return 1
   fi
   set_private_key_file
   ansible-playbook -i "$inventory" ans_e.ans_e_base.kubee_restart.yml
 }
 
-
-rotate_certs(){
+rotate_certs() {
   if ! inventory=$(ansible_inventory_file); then
-      echo::err "Error while generating the ansible inventory file"
-      return 1
+    echo::err "Error while generating the ansible inventory file"
+    return 1
   fi
   set_private_key_file
   ansible-playbook -i "$inventory" ans_e.ans_e_base.kubee_rotate_certs.yml
 }
 
-
-uninstall(){
+uninstall() {
 
   if ! inventory=$(ansible_inventory_file); then
-      echo::err "Error while generating the ansible inventory file"
-      return 1
+    echo::err "Error while generating the ansible inventory file"
+    return 1
   fi
   set_private_key_file
   ansible-playbook -i "$inventory" k3s.orchestration.reset.yml
 
 }
 
-reboot(){
+reboot() {
 
   if ! inventory=$(ansible_inventory_file); then
-      echo::err "Error while generating the ansible inventory file"
-      return 1
+    echo::err "Error while generating the ansible inventory file"
+    return 1
   fi
   set_private_key_file
   ansible-playbook -i "$inventory" k3s.orchestration.reboot.yml
 
 }
 
-
-
 # Verify the connection before installation
 # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/ping_module.html
-ping(){
+ping() {
 
   if ! inventory=$(ansible_inventory_file); then
     echo::err "Error while generating the ansible inventory file"
@@ -157,7 +151,7 @@ ping(){
 
 }
 
-set_private_key_file(){
+set_private_key_file() {
   # Private Key file
   export ANSIBLE_PRIVATE_KEY_FILE="${ANSIBLE_PRIVATE_KEY_FILE:-}"
   if [ "$ANSIBLE_PRIVATE_KEY_FILE" == "" ]; then
@@ -193,66 +187,78 @@ set_private_key_file(){
   fi
 }
 
-install_collections_required(){
+install_collections_required() {
+
   echo::debug "Installing ansible collections requirements:"
   local SCRIPT_DIR
-  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-  ansible-galaxy install -r "$SCRIPT_DIR/../ansible-requirements.yml" > "$COMMAND_STDOUT_FD"
+  SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+  # Unfortunately, all git collections are installed every time
+  # while the one published with a fix version are not
+  ansible-galaxy collection install -r "$SCRIPT_DIR/../ansible-requirements.yml" -p "$ANSIBLE_COLLECTIONS_PATH" > "$COMMAND_STDOUT_FD" 2>&1
 }
 
-main(){
+main() {
 
   echo::debug "Starting k3s-ansible driver with the args: $*"
 
-  # Making sure that we have the required collections
-  install_collections_required
+  # Own collections path to check if it was already installed
+  export ANSIBLE_COLLECTIONS_PATH="$HOME/.kubee/collections"
 
-  while [[ $# -gt 0 ]]
-    do
-       case "$1" in
-          "play"|"install")
-             install_play
-             return
-             ;;
-          "uninstall")
-            uninstall
-            return
-            ;;
-          "upgrade")
-            upgrade
-            return
-            ;;
-          "conf"|"template"|"inventory")
-            yq "$(ansible_inventory_file)"
-            return
-            ;;
-          "reboot")
-            reboot
-            return
-            ;;
-          "rotate-certs")
-            rotate_certs
-            return
-            ;;
-          "ping")
-            ping
-            return
-          ;;
-          "restart")
-            restart
-            return
-            ;;
-          "--help"|"-h"|"help"|"synopsis")
-            synopsis
-            return
-            ;;
-       esac
-       shift
-    done
-    synopsis
-    echo::err "No known command found"
-    return 1
+  # Check if installed
+  if [ ! -d "$ANSIBLE_COLLECTIONS_PATH/ansible_collections/k3s" ]; then
+    echo::info "Ansible collections not found, installation"
+    install_collections_required
+    echo::info "Ansible collections installation done"
+  fi
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      "play" | "install")
+        install_play
+        return
+        ;;
+      "uninstall")
+        uninstall
+        return
+        ;;
+      "upgrade")
+        upgrade
+        return
+        ;;
+      "conf" | "template" | "inventory")
+        yq "$(ansible_inventory_file)"
+        return
+        ;;
+      "reboot")
+        reboot
+        return
+        ;;
+      "rotate-certs")
+        rotate_certs
+        return
+        ;;
+      "ping")
+        ping
+        return
+        ;;
+      "restart")
+        restart
+        return
+        ;;
+      "ansible-req")
+        install_collections_required
+        return
+        ;;
+      "--help" | "-h" | "help" | "synopsis")
+        synopsis
+        return
+        ;;
+    esac
+    shift
+  done
+  synopsis
+  echo::err "No known command found"
+  return 1
 }
 
 main "$@"
-
