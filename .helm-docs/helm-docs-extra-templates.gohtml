@@ -13,46 +13,46 @@
 {{ define "kubee-site-page-label" }}
   {{- $page := (index . 0) }}
   {{- $label := (index . 1) }}
-  {{- printf "[%s](https://github.com/EraldyHq/kubee/blob/main/docs/site/%s.md)" $label  $page }}
+  {{- printf "[%s](https://kubee.bytle.net/%s)" $label  $page }}
 {{ end }}
 
 {{ define "kubee-issue-url" }}
   {{- $label := . }}
-  {{- printf "[%s](https://github.com/EraldyHq/kubee/issues)" $label }}
+  {{- printf "[%s](https://github.com/bytle/kubee/issues)" $label }}
 {{ end }}
 
 {{/* deprecated*/}}
-{{ define "kubee-site-url" }}https://github.com/EraldyHq/kubee/blob/main/docs/site{{ end }}
-{{ define "kubee-chart-url" }}https://github.com/EraldyHq/kubee/blob/main/charts{{ end }}
+{{ define "kubee-site-url" }}https://kubee.bytle.net{{ end }}
+{{ define "kubee-chart-url" }}https://github.com/bytle/kubee/blob/main/charts{{ end }}
 
-{{ define "kubee-admin-user-label" }}{{ template "kubee-site-page-label" (list "admin-user" .)}}{{ end }}
-{{ define "kubee-cluster-values-file-label" }}{{ template "kubee-site-page-label" (list "cluster-values" .)}}{{ end }}
+{{ define "kubee-admin-user-label" }}{{ template "kubee-site-page-label" (list "/general/admin-user" .)}}{{ end }}
+{{ define "kubee-cluster-values-file-label" }}{{ template "kubee-site-page-label" (list "cluster/cluster-values" .)}}{{ end }}
 
 {{/* Create an URL */}}
-{{ define "kubee-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubee chart{{end}}]({{ template "kubee-site-url" .}}/kubee-helmet-chart.md){{ end }}
+{{ define "kubee-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubee chart{{end}}]({{ template "kubee-site-url" .}}/helmet/helmet-chart){{ end }}
 {{/* Create an URL for an app chart */}}
-{{ define "kubee-app-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubee app chart{{end}}]({{ template "kubee-site-url" .}}/app-chart.md){{ end }}
+{{ define "kubee-app-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubee app chart{{end}}]({{ template "kubee-site-url" .}}/helmet/app-chart){{ end }}
 
-{{ define "kubee-enabled-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}enabled{{end}}]({{ template "kubee-site-url" .}}/chart-enabled.md){{ end }}
+{{ define "kubee-enabled-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}enabled{{end}}]({{ template "kubee-site-url" .}}/helmet/chart-enabled){{ end }}
 
-{{ define "kubee-pass-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}pass{{end}}]({{ template "kubee-site-url" .}}/pass.md){{ end }}
+{{ define "kubee-pass-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}pass{{end}}]({{ template "kubee-site-url" .}}/general/pass){{ end }}
 
 {{/* The link to the page */}}
 {{ define "kubee-chart-page-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}{{ fail "chart name is mandatory"}}{{end}}]({{ template "kubee-chart-url" .}}/{{.}}/README.md){{ end }}
 
-{{ define "kubee-crds-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubee crds chart{{end}}]({{ template "kubee-site-url" .}}/crds-chart.md){{ end }}
+{{ define "kubee-crds-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubee crds chart{{end}}]({{ template "kubee-site-url" .}}/helmet/crds-chart){{ end }}
 
-{{ define "kubee-jsonnet-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubee jsonnet chart{{end}}]({{ template "kubee-site-url" .}}/jsonnet-chart.md){{ end }}
+{{ define "kubee-jsonnet-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubee jsonnet chart{{end}}]({{ template "kubee-site-url" .}}/helmet/jsonnet-project){{ end }}
 
 
 
-{{ define "kubee-cloudflare-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}cloudflare{{end}}]({{ template "kubee-site-url" .}}/cloudflare.md){{ end }}
+{{ define "kubee-cloudflare-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}cloudflare{{end}}]({{ template "kubee-site-url" .}}/general/cloudflare){{ end }}
 
-{{ define "kubee-cluster-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}cluster chart{{end}}]({{ template "kubee-site-url" .}}/cluster-chart.md){{ end }}
+{{ define "kubee-cluster-chart-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}cluster chart{{end}}]({{ template "kubee-site-url" .}}/helmet/cluster-chart){{ end }}
 
-{{ define "kubee-kubectl-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubectl{{end}}]({{ template "kubee-site-url" .}}/kubectl.md){{ end }}
+{{ define "kubee-kubectl-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}kubectl{{end}}]({{ template "kubee-site-url" .}}/general/kubectl){{ end }}
 
-{{ define "kubee-chart-status-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}chart status{{end}}]({{ template "kubee-site-url" .}}/kubee-helmet-chart.md#status){{ end }}
+{{ define "kubee-chart-status-label" }}[{{if eq (kindOf .) "string"}}{{.}}{{else}}chart status{{end}}]({{ template "kubee-site-url" .}}/helmet/helmet-chart#status){{ end }}
 
 
 

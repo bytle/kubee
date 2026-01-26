@@ -15,7 +15,7 @@ Install in no time, in your VPS:
 
 Because we are starting from the `simplest Kubernetes cluster` as stated in the [official documentation](https://kubernetes.io/docs/setup/production-environment/#production-control-plane).
 
-> The simplest Kubernetes cluster has the entire control plane 
+> The simplest Kubernetes cluster has the entire control plane
 > and worker node services running on the same machine.
 > You can grow that environment by adding worker nodes.
 
@@ -33,23 +33,23 @@ Works out of the box
 
 ## BYOC: Bring your own cloud
 
-kubee is a Bring Your Own Cloud (BYOC) app that allows you 
-to run applications using your own cloud infrastructure 
-and resources rather than relying on 
-a third-party vendor. 
+kubee is a Bring Your Own Cloud (BYOC) app that allows you
+to run applications using your own cloud infrastructure
+and resources rather than relying on
+a third-party vendor.
 
 BYOC, the Next Evolution of SaaS
 https://thenewstack.io/saas-is-broken-why-bring-your-own-cloud-byoc-is-the-future/
 
-## Rendered manifest pattern 
+## Rendered manifest pattern
 
-We implement the rendered manifest pattern to decouple 
-how we write the config (helm or other) 
+We implement the rendered manifest pattern to decouple
+how we write the config (helm or other)
 from how we deploy it.
 
 By doing so, you can:
-* automatically generate a new set of yaml for CI integration at every change in the cluster config 
-* deploy the "rendered manifest" into the cluster manually or automatically 
+* automatically generate a new set of yaml for CI integration at every change in the cluster config
+* deploy the "rendered manifest" into the cluster manually or automatically
 
 
 ## App examples
@@ -65,7 +65,7 @@ By doing so, you can:
 * No downtime thanks to [Rolling Update](https://kubernetes.io/docs/tutorials/kubernetes-basics/update/update-intro/)
 * CI/CD Deployment with [ArgoCd](charts/argocd/README.md), Flux
 
- 
+
 ## List of Kubee Charts
 
 
@@ -82,23 +82,12 @@ By doing so, you can:
 | [{{ $description }}]({{ template "kubee-chart-url"}}/{{$name}}/README.md) | {{ template "kubee-chart-status-label" $values.status }} | {{ $values.kind }} | {{ $values.category }}  |
 {{- end }}
 
-Note that you are not limited to Kubee Charts. 
+Note that you are not limited to Kubee Charts.
 You can install any Helm chart or Kubernetes Manifest, but you would need to discover the configuration yourself.
 
-To make your charts, `kubee`  compatible and reuse the configuration of dependent charts, 
+To make your charts, `kubee`  compatible and reuse the configuration of dependent charts,
 you can read the {{ template "kubee-chart-label" "kubee chart documentation" }}.
 
-## Steps
+## Getting Started
 
-### Installation
-
-To get the application, an Mac / Linux / Windows WSL with HomeBrew
-
-```bash
-brew install bytle/tap/kubee
-```
-
-### Getting Started
-
-See [How to create a cluster and install applications](website/src/content/docs/cluster/cluster-creation.md)
-
+See [How to create a cluster and install applications](https://kubee.bytle.net/getting-started)
