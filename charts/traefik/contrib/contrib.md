@@ -76,10 +76,6 @@ They were on 2 while traefik was already on 3.
 
 ## Support
 
-### Why a 404?
-
-* Check the traefik dashboard for any middleware problem
-
 ### How to access the traefik dashboard
 
 It's not possible via port forwarding `http://localhost:8080/dashboard/`
@@ -90,13 +86,5 @@ The only way is to:
 * edit the `IngressRoute` and to disable the auth middleware
 * access the dashboard via hostname 
 
-### Why a 500?
-
-500 are really difficult to debug.
-
-Possible solutions:
-
-* Restart the auth proxy.
-  If you get a 500 on a Ingress that has an auth middleware such as Oauth2, it may be caused by a
-  bad certificate. The certificate is renewed but if the Oauth2 is not restarted, the old cert is still active. 
+ 
 
