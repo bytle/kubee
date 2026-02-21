@@ -29,18 +29,19 @@ function deploy() {
   echo "Patch Deployment"
   KUBE_ARGOCD_DIR="$HOME/code/kube-argocd"
   cd "$KUBE_ARGOCD_DIR"
-  APP_MANIFEST_PATH=charts/net-bytle/templates/net-bytle-deployment.yml
   # Patch with the last commit the app deployment
   POINTER="# IMAGE_TO_UPDATE"
   TAG_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$TAG")
+  echo "Tag digest: $TAG_DIGEST" >&2
   # ie TAG_DIGEST=ghcr.io/gerardnico/bytle@sha256:c327aabb0a23d19b8503c55e994343cbccddb83ff7eb0ce22d071697760da959
   DIGEST="${TAG_DIGEST#*sha256:}"
-  SED_EXPRESSION="s/image: \".*\" $POINTER/image: \"ghcr.io\/$ORGANIZATION_NAME\/$PROJECT_NAME:$RELEASE_VERSION@sha256:$DIGEST\" $POINTER/"
+  SED_EXPRESSION="s/image: \".*\" $POINTER/image: \"ghcr.io\/$ORGANIZATION_NAME\/$IMAGE_NAME:$RELEASE_VERSION@sha256:$DIGEST\" $POINTER/"
+  echo "SED_EXPRESSION: $SED_EXPRESSION"
   sed -i "$SED_EXPRESSION" "$APP_MANIFEST_PATH"
   # Do we have changes?
   CHANGES_COUNT=$(git diff --name-only | wc -l)
   if [ "$CHANGES_COUNT" == '0' ]; then
-    echo "No changes (Should not happen on push)"
+    echo "No changes on $KUBE_ARGOCD_DIR/$APP_MANIFEST_PATH (Should not happen on push)" >&2
     exit 1
   fi
   echo "Deployment file has changed, pushing it"
@@ -134,7 +135,9 @@ fi
 
 # We release by hash
 export RELEASE_VERSION="early-access"
-export TAG="ghcr.io/$ORGANIZATION_NAME/$PROJECT_NAME-website:$RELEASE_VERSION"
+export IMAGE_NAME="$PROJECT_NAME-website"
+export TAG="ghcr.io/$ORGANIZATION_NAME/$IMAGE_NAME:$RELEASE_VERSION"
+export APP_MANIFEST_PATH="charts/net-bytle-$PROJECT_NAME/templates/kubee-deployment.yml"
 export PORT=3010
 export CONTAINER=$PROJECT_NAME
 case "$COMMAND" in
