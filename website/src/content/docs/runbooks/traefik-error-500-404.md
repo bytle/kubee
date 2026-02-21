@@ -1,4 +1,6 @@
-# Traefik Error
+---
+title: Traefik Error
+---
 
 ## Error 500
 
@@ -13,4 +15,3 @@ Possible solutions
 ## Why a 404?
 
 * Check the traefik dashboard for any middleware problem
-

@@ -16,6 +16,8 @@ function synopsis() {
   Command:
     * build : build the docker image
     * run   : start the docker image
+    * push  : push the docker image
+    * full  : build, push in one command
 
   Options:
     * --debug                 : set the level to debug

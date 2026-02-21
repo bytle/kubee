@@ -162,7 +162,7 @@ server-01.example.com | SUCCESS => {
 
 ### Execute the cluster installation
 
-Once, you can connect to your cluster, you can install it with the `ping` command
+Once, you can connect to your cluster, you can install it with the `play` command
 
 Example:
 
