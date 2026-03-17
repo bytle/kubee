@@ -15,3 +15,10 @@ Possible solutions
 ## Why a 404?
 
 * Check the traefik dashboard for any middleware problem
+
+## Why a 418?
+
+The `noop@internal` returns a 418 per default.
+
+It happens when your middlewares on your route does not apply.
+
