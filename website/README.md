@@ -1,6 +1,6 @@
 # Kubee Website
 
-## Intellij IDEA WSL Setup
+## IntelliJ IDEA WSL Setup
 
 Settings > Language and framework >
 

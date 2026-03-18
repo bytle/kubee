@@ -29,6 +29,8 @@ function deploy() {
   echo "Patch Deployment"
   KUBE_ARGOCD_DIR="$HOME/code/kube-argocd"
   cd "$KUBE_ARGOCD_DIR"
+  # git pull
+  git pull
   # Patch with the last commit the app deployment
   POINTER="# IMAGE_TO_UPDATE"
   TAG_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$TAG")
