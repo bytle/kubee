@@ -6,7 +6,7 @@
 
 # Kubee Cert-Manager Crds Chart
 
-This [crds chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/crds-chart.md) installs the CRDs of cert-manager.
+This [crds chart](https://kubee.bytle.net/helmet/crds-chart) installs the CRDs of cert-manager.
 
 It's a dependency of the [kubee cert manager chart](../cert-manager/README.md)
 

@@ -6,20 +6,20 @@
 
 # Kubee External Secrets Charts
 
-This [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) installs [external secrets](https://external-secrets.io/latest/) `0.14.3`
+This [Kubee App Chart](https://kubee.bytle.net/helmet/app-chart) installs [external secrets](https://external-secrets.io/latest/) `0.14.3`
 
 ## Features
 
 ### Vault
-It will optionally configure [vault](https://github.com/EraldyHq/kubee/blob/main/charts/vault/README.md) as secret store if
-* [vault](https://github.com/EraldyHq/kubee/blob/main/charts/vault/README.md) is [enabled](https://github.com/EraldyHq/kubee/blob/main/docs/site/chart-enabled.md)
+It will optionally configure [vault](https://github.com/bytle/kubee/blob/main/charts/vault/README.md) as secret store if
+* [vault](https://github.com/bytle/kubee/blob/main/charts/vault/README.md) is [enabled](https://kubee.bytle.net/helmet/chart-enabled)
 * and an `api token` is provided
 
 ### Kubee Charts Features
 
-  These [kubee charts](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) add their features when `enabled`.
+  These [kubee charts](https://kubee.bytle.net/helmet/helmet-chart) add their features when `enabled`.
 
-* [vault](https://github.com/EraldyHq/kubee/blob/main/charts/vault/README.md)
+* [vault](https://github.com/bytle/kubee/blob/main/charts/vault/README.md)
 
 ## Installation
 

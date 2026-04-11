@@ -6,7 +6,7 @@
 
 # Kubee K3s-ansible Cluster Chart
 
-This [Kubee chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) is a [cluster chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/cluster-chart.md)
+This [Kubee chart](https://kubee.bytle.net/helmet/helmet-chart) is a [cluster chart](https://kubee.bytle.net/helmet/cluster-chart)
 that will install [k3s Kubernetes distribution](https://docs.k3s.io/) on your hosts
 with the [official k3s-ansible playbooks](https://github.com/k3s-io/k3s-ansible).
 
@@ -106,4 +106,4 @@ Reboot will execute the [reboot playbook](https://github.com/k3s-io/k3s-ansible/
 | restart_cron | string | `"0 11 * * *"` | A cron expression to schedule a k3s restart A restart is mandatory as k3s performs database operation at startup such as compaction. Restarting k3s does not stop the containers, the apps are still working |
 | server_args | list | `[]` | The [k3s Server Args](https://docs.k3s.io/cli/server) Example: `--kube-apiserver-arg="admission-control-config-file=/var/lib/rancher/k3s/server/psa.yaml"` |
 | token | string | `""` | The [k3s Token](https://docs.k3s.io/cli/token) (Mandatory). A random secret value that should not change ever because it's used to encrypt the data on disk. You can generate one with `openssl rand -base64 64 | tr -d '\n'`) |
-| version | string | `"v1.32.2+k3s1"` | The [K3s version](https://github.com/k3s-io/k3s/releases) |
+| version | string | `"v1.35.3+k3s1"` | The [K3s version](https://github.com/k3s-io/k3s/releases) |

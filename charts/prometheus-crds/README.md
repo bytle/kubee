@@ -6,10 +6,10 @@
 
 # Kubee Prometheus Crds Chart
 
-This [kubee crds chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/crds-chart.md) installs the [prometheus](https://github.com/EraldyHq/kubee/blob/main/charts/prometheus/README.md)
-[CRDs](https://github.com/EraldyHq/kubee/blob/main/docs/site/crds-chart.md).
+This [kubee crds chart](https://kubee.bytle.net/helmet/crds-chart) installs the [prometheus](https://github.com/bytle/kubee/blob/main/charts/prometheus/README.md)
+[CRDs](https://kubee.bytle.net/helmet/crds-chart).
 
-This chart is automatically installed when the [prometheus](https://github.com/EraldyHq/kubee/blob/main/charts/prometheus/README.md) chart is installed
+This chart is automatically installed when the [prometheus](https://github.com/bytle/kubee/blob/main/charts/prometheus/README.md) chart is installed
 
 ## CRDs List
 

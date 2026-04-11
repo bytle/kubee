@@ -6,7 +6,7 @@
 
 # Kubee Vault Chart
 
-A [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) that [installs Vault](https://developer.hashicorp.com/vault/docs/platform/k8s)
+A [Kubee App Chart](https://kubee.bytle.net/helmet/app-chart) that [installs Vault](https://developer.hashicorp.com/vault/docs/platform/k8s)
 in a standalone mode.
 
 ## Installation
@@ -19,9 +19,9 @@ kubee --cluster cluster-name helmet play vault
 
 ### Kubee Charts Features
 
-  These [kubee charts](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) add their features when `enabled`.
+  These [kubee charts](https://kubee.bytle.net/helmet/helmet-chart) add their features when `enabled`.
 
-* [traefik](https://github.com/EraldyHq/kubee/blob/main/charts/traefik/README.md) creates an [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) if hostnames are defined
+* [traefik](https://github.com/bytle/kubee/blob/main/charts/traefik/README.md) creates an [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) if hostnames are defined
 
 ## Values
 

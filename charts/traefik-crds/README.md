@@ -7,13 +7,13 @@
 # Kubee Traefik Crds Chart
 
 > [!WARNING]
-> This chart is in the [deprecated status](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md#status) and is not fit to be installed or upgraded
+> This chart is in the [deprecated status](https://kubee.bytle.net/helmet/helmet-chart#status) and is not fit to be installed or upgraded
 
 > [!NOTE]
 > Traefik does publish now a CRDS Chart.
 > This chart has become obsolete.
 
-This [Crds Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/crds-chart.md) installs the Traefik CRDs.
+This [Crds Chart](https://kubee.bytle.net/helmet/crds-chart) installs the Traefik CRDs.
 
 ## Dev
 

@@ -17,7 +17,8 @@ Note:
     * should be added as Dex client
     * depends on Dex for authentication
 
-Steps:
+### Deploy
+
 * In your {{ template "kubee-cluster-values-file-label" "cluster values file" }} 
     * Enable `oauth2-proxy` and `dex`
     * And set the minimal `oauth2-proxy` cluster Values files
@@ -25,7 +26,7 @@ Steps:
 # oauth2_proxy minimal values
 oauth2_proxy:
   enabled: true
-  hostname: 'oauth2.example.com'
+  hostname: 'oauth2-xxx.sslip.io'
   auth:
     cookie_secret: '${KUBE_OAUTH2_COOKIE_SECRET}'
 # Dex values
@@ -45,27 +46,41 @@ kubee --cluster clusterName helmet play dex
 ```bash
 kubee --cluster clusterName helmet play oauth2-proxy
 ```
-* Testing:
-    * Dex Integration:
-        * Go to https://oauth2.example.com
-        * Try to authenticate.
-        * The flow should go through and you should see `Authenticated`
-    * Forward Auth Configuration:
-        * Apply on the {{ template "kubee-chart-page-label" "whoami" }} chart the `forward-auth` middleware name.
-        * Try to reach the whoami hostname
-* Once tested, you can then change the {{ template "kubee-chart-page-label" "auth middleware name value of Traefik" }} to `forward-auth`
+
+### Testing Oauth2 Login
+
+You can test the Dex Integration by:
+
+* Go to https://oauth2-xxx.sslip.io
+* Try to authenticate.
+* The flow should go through and you should see `Authenticated`
+
+### Register/Create the Traefik forward-auth middleware
+
+Once tested, you can then change the `auth.middleware` name value of {{ template "kubee-chart-page-label" "traefik" }} to `forward-auth`
   to forward the authentication to `dex`
 ```yaml
-auth:
-  middleware_name: 'forward-auth'
+traefik:
+    auth:
+      middleware_name: 'forward-auth'
 ```
-* Redeploy the dependent charts to apply the change. ie
-    * {{ template "kubee-chart-page-label" "traefik" }} for the internal dashboard
-    * {{ template "kubee-chart-page-label" "prometheus" }} for the web app
-    * {{ template "kubee-chart-page-label" "alertmanager" }} for the web app
-    * {{ template "kubee-chart-page-label" "kubernetes-dashboard" }} for the web app
-    * ...
 
+### Testing forward-auth Traefik middleware
+
+Forward Auth Configuration:
+
+* Apply on the {{ template "kubee-chart-page-label" "whoami" }} chart the `forward-auth` middleware name.
+* Try to reach the whoami hostname
+
+### Redeploy the dependent charts to apply the change
+
+Redeploy the dependent charts to apply the change. ie
+
+* {{ template "kubee-chart-page-label" "traefik" }} for the internal dashboard
+* {{ template "kubee-chart-page-label" "prometheus" }} for the web app
+* {{ template "kubee-chart-page-label" "alertmanager" }} for the web app
+* {{ template "kubee-chart-page-label" "kubernetes-dashboard" }} for the web app
+* ...
 
 
 {{ template "chart.valuesSection" . }}

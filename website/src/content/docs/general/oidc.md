@@ -2,15 +2,26 @@
 title: Oidc
 ---
 
+OIDC login is supported when the [dex chart](https://github.com/bytle/kubee/tree/main/charts/dex) is installed/enabled.
 
-## Test OIDC
+## Clients
+
+* [Kubectl](kubectl.md#oidc)
+
+## Support
+
+### Test Kubernetes Aud
 
 The JWS Token should have the `Kubernetes` audience to log in to the Kubernetes API.
+(ie they should be in the `trustedPeers` property of the `kubernetes` client in the dex `staticClients` config)
 
-Example: Whoami Token as seen in https://jwt.io
+Get your [Bearer](../runbooks/check-forward-auth-bearer.md)
+
+Example: WhoAmi Token as seen in https://jwt.io
+
 ```json
 {
-  "iss": "https://dex-xxx.nip.io",
+  "iss": "https://dex-xxx.sslip.io",
   "sub": "CiQwOGE4Njg0Yi1kYjg4LTRiNzMtOTBhOS0zY2QxNjYxZjU0NjYSBWxvY2Fs",
   "aud": [
     "kubernetes",

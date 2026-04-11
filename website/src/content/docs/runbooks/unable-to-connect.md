@@ -1,4 +1,6 @@
-# Unable to connect
+---
+title: Unable to connect
+---
 
 ## Steps
 
@@ -68,7 +70,7 @@ KUBECONFIG=~/.kube/k3s.yaml kubee kubectl cluster-info
 Optionally:
 
 * you can rename it to the default: `$HOME/.kube/config`
-* you can update the client cert if you use [pass to store it](kubeconfig-pass.md)
+* you can update the client cert if you use [pass to store it](../general/kubeconfig-pass.md)
 
 ```bash
 # set your names

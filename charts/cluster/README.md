@@ -15,7 +15,7 @@ It adds support for sharing:
 * common app values such as:
   * users (admin)
   * email
-  * [cloudflare](https://github.com/EraldyHq/kubee/blob/main/docs/site/cloudflare.md)
+  * [cloudflare](https://kubee.bytle.net/general/cloudflare)
   * trusted proxies
 * and a [common library of functions](templates/_helpers.tpl)
 

@@ -6,7 +6,7 @@
 
 # Kubee Dex Chart
 
-This [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app-chart.md) installs the [dex identity provider](https://dexidp.io/).
+This [Kubee App Chart](https://kubee.bytle.net/helmet/app-chart) installs the [dex identity provider](https://dexidp.io/).
 
 `Dex` supports:
 * a local password store
@@ -15,7 +15,7 @@ This [Kubee App Chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/app
 ## Features
 
 ### Automatic Users
-The [admin user](https://github.com/EraldyHq/kubee/blob/main/docs/site/admin-user.md)
+The [admin user](https://kubee.bytle.net//general/admin-user)
  is created with its email as login.
 
 ### Auth Form Protection
@@ -26,20 +26,20 @@ This chart will protect the authentication form with HTTP authentication headers
 
 If their secret value is not empty, the following clients are added:
 
-* [oauth2-proxy](https://github.com/EraldyHq/kubee/blob/main/charts/oauth2-proxy/README.md) (if [enabled](https://github.com/EraldyHq/kubee/blob/main/docs/site/chart-enabled.md))
-* [postal](https://github.com/EraldyHq/kubee/blob/main/charts/postal/README.md) (if [enabled](https://github.com/EraldyHq/kubee/blob/main/docs/site/chart-enabled.md))
-* [kubectl](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubectl.md)
+* [oauth2-proxy](https://github.com/bytle/kubee/blob/main/charts/oauth2-proxy/README.md) (if [enabled](https://kubee.bytle.net/helmet/chart-enabled))
+* [postal](https://github.com/bytle/kubee/blob/main/charts/postal/README.md) (if [enabled](https://kubee.bytle.net/helmet/chart-enabled))
+* [kubectl](https://kubee.bytle.net/general/kubectl)
 
 ### Kubee Charts Features
 
-  These [kubee charts](https://github.com/EraldyHq/kubee/blob/main/docs/site/kubee-helmet-chart.md) add their features when `enabled`.
+  These [kubee charts](https://kubee.bytle.net/helmet/helmet-chart) add their features when `enabled`.
 
-* [cert-manager](https://github.com/EraldyHq/kubee/blob/main/charts/cert-manager/README.md) adds [server certificates](https://cert-manager.io/docs/usage/certificate/) to the servers
-* [traefik](https://github.com/EraldyHq/kubee/blob/main/charts/traefik/README.md) creates an [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) if hostnames are defined
+* [cert-manager](https://github.com/bytle/kubee/blob/main/charts/cert-manager/README.md) adds [server certificates](https://cert-manager.io/docs/usage/certificate/) to the servers
+* [traefik](https://github.com/bytle/kubee/blob/main/charts/traefik/README.md) creates an [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) if hostnames are defined
 
 ## Cluster Values Example
 
-In your [cluster values file](https://github.com/EraldyHq/kubee/blob/main/docs/site/cluster-values.md)
+In your [cluster values file](https://kubee.bytle.net/cluster/cluster-values)
 , you need to fill at minimum this values:
 ```yaml
 dex:
@@ -56,7 +56,7 @@ dex:
 
 In the cluster `.envrc` file, set the env `DEX_OAUTH_CLI_SECRET` and `DEX_KUBECTL_CLI_SECRET` with your favorite secret store.
 
-Example with [pass](https://github.com/EraldyHq/kubee/blob/main/docs/site/pass.md):
+Example with [pass](https://kubee.bytle.net/general/pass):
 ```bash
 export DEX_FORWARD_AUTH_CLI_SECRET
 DEX_FORWARD_AUTH_CLI_SECRET=$(pass "cluster_name/dex/forward-auth-cli-secret")

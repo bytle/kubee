@@ -6,7 +6,7 @@
 
 # Kubee External Dns Crds Chart
 
-This [kubee crds chart](https://github.com/EraldyHq/kubee/blob/main/docs/site/crds-chart.md) installs the [External DNS CRDs](https://kubernetes-sigs.github.io/external-dns/latest/docs/contributing/crd-source/)
+This [kubee crds chart](https://kubee.bytle.net/helmet/crds-chart) installs the [External DNS CRDs](https://kubernetes-sigs.github.io/external-dns/latest/docs/contributing/crd-source/)
 
 ## Dev/Contrib
 
