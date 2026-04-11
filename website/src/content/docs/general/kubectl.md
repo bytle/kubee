@@ -14,4 +14,5 @@ makes sure to creates a connection to the [cluster](../cluster/cluster.md)
 
 ### OIDC
 
-Check [](../runbooks/config-kubelogin.md)
+Check [How to configure kubectl with kubelogin for OIDC login](../runbooks/config-kubelogin.md)
+
