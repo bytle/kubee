@@ -9,7 +9,7 @@ title: K3S backup
 * Always back up your token.
 * If you're using
   * etcd snapshots, take snapshots and back them up somewhere.
-  * sqlite, stop the server and back up the sqlite files.
+  * [sqlite, stop the server and back up the sqlite files](../runbooks/k3s-upgrade.md#take-a-backup-of-your-cluster-datastore)
   * an external database, back that up.
 * If you have persistent volumes, use whatever tool your storage vendor recommends.
 

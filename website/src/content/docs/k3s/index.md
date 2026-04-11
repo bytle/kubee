@@ -6,7 +6,4 @@ title: k3s
 
 ## Dev Contribution
 
-### Implementation
-
-The []()
-The [k3s_ansible](https://github.com/bytle/kubee/tree/main/charts/k3s-ansible)
+`k3s` is installed with the [k3s_ansible driver chart](https://github.com/bytle/kubee/tree/main/charts/k3s-ansible)

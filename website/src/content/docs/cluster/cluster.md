@@ -17,7 +17,7 @@ See [cluster creation](cluster-creation.md)
 
 ### Upgrade the cluster distribution
 
-See [k3s upgrade](../k3s/upgrade.md)
+See [k3s upgrade](../runbooks/k3s-upgrade.md)
 
 ## Dev Contribution
 

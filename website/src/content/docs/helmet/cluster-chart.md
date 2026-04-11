@@ -19,7 +19,7 @@ This script may implement the following command:
 * `play`      : install a Kubernetes distribution in the cluster hosts
 * `reboot`    : reboot the cluster hosts (ie operating system) in order
 * `uninstall` : uninstall the Kubernetes distribution in the cluster hosts
-* `upgrade`   : [upgrade the Kubernetes distribution](../k3s/upgrade.md) in the cluster hosts
+* `upgrade`   : [upgrade the Kubernetes distribution](../runbooks/k3s-upgrade.md) in the cluster hosts
 
 
 ## Default Cluster Chart

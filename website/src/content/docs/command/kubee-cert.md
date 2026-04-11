@@ -1,5 +1,5 @@
 ---
-title: kubee-cert command
+title: kubee cert command
 ---
 [//]: # (% kubee-cert&#40;1&#41; Version Latest | Print kubernetes certificates in plain text)
 
@@ -12,5 +12,5 @@ Return the kubeconfig cert in plain text
 
 ```bash
 export KUBECONFIG=~/.kube/config
-kubee-cert config-client
+kubee cert config-client
 ```
