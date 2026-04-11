@@ -107,6 +107,7 @@ distributions:
       dependencies:
         # https://formulae.brew.sh/formula/ansible
         ansible: 'null'
+        "helm@3": 'null'
       extraProperties:
         # Don't add java as dependency
         # https://jreleaser.org/guide/latest/reference/packagers/homebrew.html#_jdk_dependency
