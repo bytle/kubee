@@ -41,3 +41,9 @@ markdown-link-check \
             --config "$SCRIPT_DIR/markdown-lint-config.json" \
             --quiet \
             website/README.md
+
+echo "Content Site"
+markdown-link-check \
+            --config "$SCRIPT_DIR/markdown-lint-config.json" \
+            --quiet \
+            website/src/content/**/*.md

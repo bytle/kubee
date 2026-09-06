@@ -4,13 +4,39 @@ title: kubeconfig
 
 `kubeconfig` is the file that permits to connect to a Kubernetes cluster.
 
+## Structure
+
+```yml
+apiVersion: v1
+kind: Config
+clusters:
+  - cluster:
+      certificate-authority-data: LS0tL
+      server: https://x.x.x.x:6443
+    name: clustert-name
+contexts:
+  - context:
+      cluster: cluster-name
+      user: default
+    name: default@cluster-name
+current-context: default@cluster-name
+users:
+  - name: default
+    user:
+      client-certificate-data: LS0tLS...
+      client-key-data: LS0t...
+```
+
 It contains:
 
 * cluster information
 * user information
-* and context
+* and context (a pair of cluster and user information)
+
+### Context
 
 The context is the pair user / cluster that is used to connect.
+
 
 ## Order of Precedence
 
@@ -57,7 +83,7 @@ kubee kubectl cluster-info
 
 ### How to encrypt
 
-We allow encryption with [pass](kubeconfig-pass.md)
+We allow also to store in encrypted with [pass](kubeconfig-pass.md)
 
 ## Support/Runbook
 

@@ -248,7 +248,7 @@ kubee::get_cluster_directory() {
   # this works for executed script or sourced script
   local KUBEE_RESOURCE_CLUSTERS_DIR=""
   if ! KUBEE_RESOURCE_CLUSTERS_DIR=$(realpath "$KUBEE_RESOURCES_DIR/examples/clusters" 2> /dev/null); then
-    echo "Warning: the example clusters were not found at $KUBEE_RESOURCES_DIR/examples/clusters"
+    echo::warn "Warning: the example clusters were not found at $KUBEE_RESOURCES_DIR/examples/clusters"
   fi
   local KUBEE_CLUSTER_DIRS+=("$KUBEE_RESOURCE_CLUSTERS_DIR")
   for KUBEE_CLUSTER_DIR in "${KUBEE_CLUSTER_DIRS[@]}"; do
@@ -515,7 +515,7 @@ kubee::set_env() {
 
     KUBEE_CLUSTER_VALUES_FILE="$KUBEE_CLUSTER_DIR/values.yaml"
     if [ ! -f "$KUBEE_CLUSTER_VALUES_FILE" ]; then
-      echo::err "Cluster values file does not exist $KUBEE_CLUSTER_VALUES_FILE"
+      echo::err "Cluster values file does not exist at the cluster path: $KUBEE_CLUSTER_VALUES_FILE"
       return 1
     else
       echo::debug "Cluster values file found at $KUBEE_CLUSTER_VALUES_FILE"
